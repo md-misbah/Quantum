@@ -1,0 +1,2451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANTUM LEAP — The Technology That Will Break Everything You Know About Computing</title>
+<meta name="description" content="An interactive documentary experience exploring how quantum computing is rewriting the future of reality.">
+
+<!-- Preload critical fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;700&family=Barlow+Condensed:wght@600&display=swap" rel="stylesheet">
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+
+<style>
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+:root {
+  --bg-void: #02020A;
+  --bg-deep: #070714;
+  --bg-surface: #0D0D24;
+  --bg-raised: #12122E;
+
+  --quantum-cyan:   #00F5FF;
+  --quantum-violet: #8B5CF6;
+  --quantum-indigo: #4F46E5;
+  --quantum-magenta:#E040FB;
+  --quantum-green:  #06FFA5;
+  --quantum-yellow: #FFB800;
+
+  --text-primary:   #F0F4FF;
+  --text-secondary: #9BA8C5;
+  --text-muted:     #4A5680;
+
+  --glow-cyan:   0 0 40px rgba(0, 245, 255, 0.35);
+  --glow-violet: 0 0 40px rgba(139, 92, 246, 0.4);
+  --glow-magenta:0 0 30px rgba(224, 64, 251, 0.3);
+
+  --data-1: #00F5FF;
+  --data-2: #8B5CF6;
+  --data-3: #E040FB;
+  --data-4: #06FFA5;
+  --data-5: #FFB800;
+
+  --border-subtle: rgba(0, 245, 255, 0.08);
+  --border-active: rgba(0, 245, 255, 0.35);
+
+  --font-hero:    clamp(3.5rem, 10vw, 9rem);
+  --font-chapter: clamp(2.5rem, 6vw, 6rem);
+  --font-h2:      clamp(1.8rem, 4vw, 3.5rem);
+  --font-h3:      clamp(1.3rem, 3vw, 2.2rem);
+  --font-body:    clamp(1rem, 1.5vw, 1.15rem);
+  --font-caption: 0.875rem;
+  --font-data:    clamp(2.2rem, 5vw, 4.5rem);
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  cursor: none;
+  -webkit-tap-highlight-color: transparent;
+}
+* { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+::selection { background: rgba(0, 245, 255, 0.2); color: var(--quantum-cyan); }
+
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+.cursor-dot {
+  position: fixed; width: 8px; height: 8px;
+  background: var(--quantum-cyan); border-radius: 50%;
+  pointer-events: none; z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s;
+}
+.cursor-ring {
+  position: fixed; width: 24px; height: 24px;
+  border: 1.5px solid var(--quantum-cyan); border-radius: 50%;
+  pointer-events: none; z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, opacity 0.2s;
+  opacity: 0.6;
+}
+.cursor-ring.hovering { width: 36px; height: 36px; opacity: 1; }
+@media (hover: none) { .cursor-dot, .cursor-ring { display: none; } body { cursor: auto; } }
+
+/* ============================================
+   SCROLL PROGRESS
+   ============================================ */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; height: 2px;
+  background: linear-gradient(90deg, var(--quantum-cyan), var(--quantum-magenta));
+  z-index: 99997; width: 0%; transition: width 0.1s linear;
+}
+.chapter-indicator {
+  position: fixed; bottom: 2rem; right: 2rem; z-index: 9990;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+  color: var(--text-muted); letter-spacing: 0.1em;
+  opacity: 0; transition: opacity 0.3s;
+}
+
+/* ============================================
+   NOISE OVERLAY
+   ============================================ */
+.noise-overlay {
+  position: fixed; inset: 0; z-index: 9996; pointer-events: none; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='512' height='512' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   PRELOADER
+   ============================================ */
+#preloader {
+  position: fixed; inset: 0; background: var(--bg-void); z-index: 99999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1.5rem;
+}
+.preloader-brackets {
+  font-family: 'JetBrains Mono', monospace; font-size: 4rem; color: var(--quantum-cyan);
+  letter-spacing: 0.5em; opacity: 0.6;
+}
+.preloader-text {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--quantum-cyan);
+  letter-spacing: 0.3em; overflow: hidden; white-space: nowrap; width: 0;
+  animation: typewriter 1.5s steps(30) 0.2s forwards;
+}
+@keyframes typewriter { to { width: 26ch; } }
+.preloader-bar-wrap {
+  width: 280px; height: 1px; background: rgba(0,245,255,0.15); position: relative; overflow: hidden;
+}
+.preloader-bar {
+  position: absolute; left: 0; top: 0; height: 100%; width: 0;
+  background: var(--quantum-cyan); box-shadow: var(--glow-cyan);
+  animation: fillbar 1.8s cubic-bezier(0.4,0,0.2,1) 0.3s forwards;
+}
+@keyframes fillbar { to { width: 100%; } }
+.preloader-counter {
+  position: absolute; top: 2rem; right: 2rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; height: 64px; z-index: 9995;
+  background: rgba(2, 2, 10, 0.85); backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(1.5rem, 4vw, 3rem);
+  transform: translateY(-100%); opacity: 0; transition: transform 0.4s ease, opacity 0.4s ease;
+}
+nav.visible { transform: translateY(0); opacity: 1; }
+.nav-logo {
+  font-family: 'JetBrains Mono', monospace; font-size: 1rem;
+  color: var(--quantum-cyan); display: flex; align-items: center; gap: 0.75rem;
+  text-decoration: none;
+}
+.nav-logo .q-mark {
+  width: 32px; height: 32px; border: 1.5px solid var(--quantum-cyan);
+  display: flex; align-items: center; justify-content: center; font-weight: 700;
+  font-size: 1rem; box-shadow: var(--glow-cyan); flex-shrink: 0;
+}
+.nav-logo span { font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; letter-spacing: 0.15em; color: var(--text-secondary); }
+.nav-links { display: flex; gap: 0; }
+.nav-links a {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; letter-spacing: 0.1em;
+  color: var(--text-muted); text-decoration: none; padding: 0 1rem; text-transform: uppercase;
+  transition: color 0.2s; position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -1px; left: 1rem; right: 1rem;
+  height: 1px; background: var(--quantum-cyan); transform: scaleX(0); transition: transform 0.2s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--quantum-cyan); }
+.nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+.hamburger span { display: block; width: 22px; height: 1.5px; background: var(--text-secondary); transition: all 0.3s; }
+.mobile-menu {
+  position: fixed; inset: 0; background: rgba(7,7,20,0.98); z-index: 9994;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2rem; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.mobile-menu.open { transform: translateX(0); }
+.mobile-menu a {
+  font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 700;
+  color: var(--text-secondary); text-decoration: none; letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+.mobile-menu a:hover { color: var(--quantum-cyan); }
+
+/* ============================================
+   SHARED SECTION STYLES
+   ============================================ */
+section { position: relative; overflow: hidden; }
+.container { max-width: 1440px; margin: 0 auto; padding: 0 clamp(1.5rem, 5vw, 5rem); }
+.section-pad { padding: clamp(5rem, 10vh, 9rem) 0; }
+.reveal { opacity: 0; transform: translateY(60px); }
+.eyebrow {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; letter-spacing: 0.3em;
+  color: var(--quantum-cyan); text-transform: uppercase; margin-bottom: 1rem;
+}
+.section-title {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: var(--font-h2);
+  line-height: 1.1; letter-spacing: 0.02em; text-transform: uppercase;
+}
+.section-subtitle {
+  font-size: var(--font-body); color: var(--text-secondary); line-height: 1.8;
+  max-width: 600px; margin-top: 1rem;
+}
+.glow-bg {
+  position: absolute; border-radius: 50%; pointer-events: none; filter: blur(80px);
+}
+
+/* ============================================
+   SECTION 1: HERO
+   ============================================ */
+#hero {
+  width: 100vw; height: 100vh; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-void); overflow: hidden;
+}
+#particle-canvas { position: absolute; inset: 0; z-index: 0; }
+.hero-glow-1 { width: 500px; height: 500px; background: rgba(0,245,255,0.06); top: -10%; left: -5%; z-index: 1; }
+.hero-glow-2 { width: 600px; height: 600px; background: rgba(139,92,246,0.06); bottom: -10%; right: -5%; z-index: 1; }
+.hero-hexgrid {
+  position: absolute; inset: 0; z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='69.28'%3E%3Cpolygon points='30,0 60,17.32 60,51.96 30,69.28 0,51.96 0,17.32' fill='none' stroke='rgba(0,245,255,0.04)' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 60px 69.28px;
+}
+.hero-corner { position: absolute; font-size: 2rem; color: var(--quantum-cyan); opacity: 0.12; font-family: 'JetBrains Mono', monospace; }
+.hero-corner.tl { top: 2rem; left: 2rem; }
+.hero-corner.br { bottom: 2rem; right: 2rem; }
+.hero-content {
+  position: relative; z-index: 2; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 1.5rem;
+}
+.hero-eyebrow {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; letter-spacing: 0.35em;
+  color: var(--quantum-cyan); margin-bottom: 2rem; opacity: 0; transform: translateY(20px);
+}
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: var(--font-hero);
+  line-height: 0.9; letter-spacing: -0.02em; text-transform: uppercase;
+  display: flex; flex-direction: column; align-items: center;
+}
+.hero-title .word { display: block; overflow: hidden; }
+.hero-title .word span { display: block; opacity: 0; transform: translateY(100%); }
+.hero-title .the-word span { color: var(--text-primary); }
+.hero-title .quantum-word span {
+  background: linear-gradient(90deg, var(--quantum-cyan) 0%, var(--quantum-violet) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-title .leap-word span { color: var(--text-primary); }
+.hero-subtitle {
+  font-family: 'DM Sans', sans-serif; font-weight: 300; font-size: 1.1rem;
+  color: var(--text-secondary); max-width: 520px; margin: 2.5rem auto 0;
+  line-height: 1.7; opacity: 0;
+}
+.hero-cta {
+  margin-top: 3rem; opacity: 0;
+  border: 1.5px solid var(--quantum-cyan); background: transparent;
+  color: var(--quantum-cyan); padding: 14px 36px; border-radius: 2px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; letter-spacing: 0.2em;
+  text-transform: uppercase; cursor: pointer; transition: all 0.3s;
+}
+.hero-cta:hover { background: var(--quantum-cyan); color: var(--bg-void); box-shadow: var(--glow-cyan); }
+.hero-scroll {
+  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+  z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  opacity: 0;
+}
+.hero-scroll-line { width: 1px; height: 50px; background: rgba(0,245,255,0.3); position: relative; overflow: hidden; }
+.hero-scroll-line::after {
+  content: ''; position: absolute; top: -100%; left: 0; width: 100%; height: 100%;
+  background: var(--quantum-cyan);
+  animation: scrollDot 1.5s cubic-bezier(0.4,0,0.6,1) infinite;
+}
+@keyframes scrollDot { to { top: 200%; } }
+
+/* ============================================
+   SECTION 2: THE PROBLEM
+   ============================================ */
+#problem {
+  background: var(--bg-deep);
+  background-image: url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='0.5' fill='rgba(255,255,255,0.015)'/%3E%3C/svg%3E");
+}
+.chapter-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; align-items: start; }
+.chapter-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 8rem; font-weight: 700;
+  color: var(--quantum-cyan); opacity: 0.1; line-height: 1; position: absolute;
+}
+.chapter-label-wrap { position: relative; padding-top: 1rem; }
+.chapter-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; letter-spacing: 0.35em;
+  color: var(--text-muted); text-transform: uppercase;
+}
+.chapter-label-wrap h2 { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; margin-top: 5.5rem; position: relative; z-index: 1; }
+.narrative-content h3 { font-family: 'Syne', sans-serif; font-size: var(--font-h3); font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary); }
+.narrative-content p { font-size: var(--font-body); color: var(--text-secondary); line-height: 1.85; margin-bottom: 1.2rem; max-width: 650px; }
+.narrative-content p strong { color: var(--quantum-cyan); font-weight: 500; }
+.chart-container {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-top: 2px solid var(--quantum-cyan); padding: 2.5rem; margin-top: 4rem;
+  position: relative;
+}
+.chart-container h4 { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2rem; }
+.moores-chart { width: 100%; height: 280px; }
+
+/* ============================================
+   SECTION 3: WHAT IS QC
+   ============================================ */
+#quantum-science { background: linear-gradient(180deg, var(--bg-void) 0%, var(--bg-deep) 100%); }
+.chapter-opener {
+  text-align: center; padding: clamp(4rem, 8vh, 7rem) 0 clamp(3rem, 6vh, 5rem);
+}
+.chapter-opener-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--quantum-cyan);
+  letter-spacing: 0.2em; margin-bottom: 1.5rem;
+}
+.chapter-opener h2 { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: var(--font-chapter); line-height: 1; letter-spacing: -0.02em; text-transform: uppercase; }
+.chapter-opener h2 .cyan { color: var(--quantum-cyan); }
+.bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px; background: var(--border-subtle); margin-top: 3rem; }
+.bento-card {
+  background: var(--bg-surface); padding: 2.5rem; position: relative;
+  border-top: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.3s, transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.bento-card:hover { background: var(--bg-raised); transform: translateY(-4px); }
+.bento-card.cyan-top { border-top: 2px solid var(--quantum-cyan); }
+.bento-card.violet-top { border-top: 2px solid var(--quantum-violet); }
+.bento-card.magenta-top { border-top: 2px solid var(--quantum-magenta); }
+.card-icon { width: 60px; height: 60px; margin-bottom: 1.5rem; }
+.card-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem; color: var(--text-primary); }
+.card-body { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 1.5rem; }
+.card-stat { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--quantum-cyan); line-height: 1.5; opacity: 0.85; }
+
+/* Wave animation for superposition */
+.wave-svg { width: 100%; height: 50px; margin: 1rem 0; }
+@keyframes waveMove { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.wave-path { stroke-dasharray: 100; animation: waveMove 3s linear infinite; }
+
+/* Particle spin for entanglement */
+.entangle-icon { position: relative; width: 60px; height: 60px; }
+@keyframes orbit { from { transform: rotate(0deg) translateX(20px) rotate(0deg); } to { transform: rotate(360deg) translateX(20px) rotate(-360deg); } }
+.orbit-particle { position: absolute; width: 8px; height: 8px; border-radius: 50%; top: 50%; left: 50%; margin: -4px; }
+.orbit-a { background: var(--quantum-cyan); animation: orbit 3s linear infinite; }
+.orbit-b { background: var(--quantum-violet); animation: orbit 3s linear infinite reverse; }
+
+/* Classical vs Quantum split */
+.cvq-split { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; margin-top: 4rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); overflow: hidden; }
+.cvq-side { padding: 3rem 2.5rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; }
+.cvq-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; letter-spacing: 0.35em; color: var(--text-muted); text-transform: uppercase; }
+.cvq-big { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 4vw, 3rem); }
+.cvq-big.classical { color: var(--text-secondary); }
+.cvq-big.quantum { color: var(--quantum-cyan); }
+.cvq-scale { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; }
+.cvq-divider { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 1.5rem; border-left: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); }
+.cvq-vs { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--quantum-magenta); writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 0.2em; }
+
+/* Light switch SVG */
+.switch-icon { width: 50px; height: 50px; }
+/* Bloch sphere */
+.bloch-wrap { position: relative; width: 60px; height: 60px; }
+@keyframes blochSpin { from { transform: rotateY(0deg) rotateX(15deg); } to { transform: rotateY(360deg) rotateX(15deg); } }
+.bloch-sphere { animation: blochSpin 8s linear infinite; }
+
+/* ============================================
+   SECTION 4: HOW IT WORKS
+   ============================================ */
+#how-it-works { background: var(--bg-deep); }
+.horiz-scroll-outer { position: relative; }
+.horiz-panels { display: flex; gap: 0; width: max-content; }
+.horiz-panel {
+  width: 80vw; max-width: 900px; min-height: 60vh;
+  background: var(--bg-surface); border-right: 1px solid var(--border-subtle);
+  padding: clamp(2rem, 5vw, 4rem); display: flex; flex-direction: column; justify-content: center;
+  position: relative; flex-shrink: 0;
+}
+.panel-num { font-family: 'JetBrains Mono', monospace; font-size: 5rem; font-weight: 700; color: var(--quantum-cyan); opacity: 0.08; position: absolute; top: 2rem; right: 2rem; }
+.panel-step { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; letter-spacing: 0.3em; color: var(--quantum-cyan); margin-bottom: 1rem; }
+.panel-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.5rem); margin-bottom: 1.5rem; }
+.panel-body { font-size: 1rem; color: var(--text-secondary); line-height: 1.8; max-width: 500px; margin-bottom: 2rem; }
+.qubit-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.qubit { width: 40px; height: 40px; border: 1.5px solid; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; transition: all 0.5s; }
+.qubit.zero { border-color: rgba(0,245,255,0.3); color: var(--text-muted); }
+.qubit.one { border-color: rgba(139,92,246,0.5); color: var(--quantum-violet); }
+.qubit.super { border-color: var(--quantum-cyan); color: var(--quantum-cyan); animation: qubitSpin 2s linear infinite; box-shadow: 0 0 15px rgba(0,245,255,0.3); }
+.qubit.entangled { border-color: var(--quantum-magenta); color: var(--quantum-magenta); box-shadow: 0 0 15px rgba(224,64,251,0.3); }
+.qubit.collapsed { border-color: var(--quantum-yellow); color: var(--quantum-yellow); }
+.qubit.output { border-color: var(--quantum-cyan); color: var(--quantum-cyan); font-size: 0.8rem; }
+@keyframes qubitSpin { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+.horiz-progress { height: 2px; background: rgba(0,245,255,0.1); margin-top: 0; position: relative; }
+.horiz-progress-bar { position: absolute; left: 0; top: 0; height: 100%; background: var(--quantum-cyan); width: 0%; transition: width 0.1s; }
+.scroll-hint { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; text-align: center; padding: 1.5rem; }
+
+/* Mobile horizontal = vertical stack */
+.vertical-panels { display: none; }
+@media (max-width: 768px) {
+  .horiz-scroll-outer .horiz-panels { display: none; }
+  .vertical-panels { display: block; }
+  .vert-panel { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-top: 2px solid var(--quantum-cyan); padding: 2rem; margin-bottom: 1px; }
+  .vert-panel .panel-step { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 0.25em; color: var(--quantum-cyan); margin-bottom: 0.5rem; }
+  .vert-panel h4 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .vert-panel p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+}
+
+/* ============================================
+   SECTION 5: BY THE NUMBERS
+   ============================================ */
+#data-section { background: var(--bg-void); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border-subtle); margin-bottom: 5rem; }
+.stat-card {
+  background: var(--bg-raised); padding: 2.5rem 2rem; text-align: center; position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--quantum-cyan), var(--quantum-violet));
+}
+.stat-card::after {
+  content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 120px; height: 120px; background: radial-gradient(circle, rgba(0,245,255,0.08), transparent);
+  pointer-events: none;
+}
+.stat-num {
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: var(--font-data);
+  color: var(--quantum-cyan); line-height: 1; font-variant-numeric: tabular-nums;
+  display: block; margin-bottom: 0.75rem;
+}
+.stat-label { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+/* Timeline */
+.timeline-section { position: relative; }
+.timeline-title { text-align: center; margin-bottom: 4rem; }
+.timeline { position: relative; padding: 0 0 2rem; }
+.timeline-spine {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  top: 0; bottom: 0; width: 1px;
+  background: linear-gradient(180deg, var(--quantum-cyan), var(--quantum-violet));
+  transform-origin: top; /* will animate with scaleY */
+}
+.timeline-event {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-bottom: 3.5rem;
+  position: relative;
+}
+.timeline-event.right .event-card { grid-column: 2; }
+.timeline-event.left .event-card { grid-column: 1; }
+.event-card {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  padding: 1.5rem 1.75rem; position: relative;
+  transition: border-color 0.3s;
+}
+.event-card:hover { border-color: var(--border-active); }
+.event-dot {
+  position: absolute; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--quantum-cyan); top: 50%; transform: translateY(-50%);
+  box-shadow: 0 0 15px rgba(0,245,255,0.5);
+}
+.timeline-event.right .event-dot { left: calc(-2rem - 6px); }
+.timeline-event.left .event-dot { right: calc(-2rem - 6px); }
+.timeline-event.right .event-card { text-align: left; }
+.timeline-event.left .event-card { text-align: right; }
+.event-year { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; color: var(--quantum-cyan); font-weight: 700; margin-bottom: 0.4rem; }
+.event-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+.event-body { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
+
+/* Power comparison chart */
+.power-chart { margin-top: 5rem; }
+.power-chart-title { text-align: center; margin-bottom: 3rem; }
+.chart-row { margin-bottom: 2.5rem; }
+.chart-row-label { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem; }
+.bar-wrap { display: flex; gap: 0.75rem; flex-direction: column; }
+.bar-item { display: flex; align-items: center; gap: 1rem; }
+.bar-item-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); width: 80px; flex-shrink: 0; text-align: right; }
+.bar { height: 28px; display: flex; align-items: center; padding-left: 0.75rem; position: relative; overflow: hidden; min-width: 2px; transition: width 1.5s cubic-bezier(0.4,0,0.2,1); }
+.bar.classical { background: rgba(100,100,130,0.3); border: 1px solid rgba(100,100,130,0.2); }
+.bar.quantum { background: rgba(0,245,255,0.15); border: 1px solid rgba(0,245,255,0.3); box-shadow: 0 0 20px rgba(0,245,255,0.1); }
+.bar-value { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; white-space: nowrap; }
+.bar.classical .bar-value { color: var(--text-muted); }
+.bar.quantum .bar-value { color: var(--quantum-cyan); }
+
+/* ============================================
+   SECTION 6: APPLICATIONS
+   ============================================ */
+#applications { background: var(--bg-deep); }
+.apps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px; background: var(--border-subtle); margin-top: 3rem; }
+.app-card {
+  background: var(--bg-surface); padding: 2.5rem 2rem;
+  transition: background 0.3s, transform 0.3s; cursor: pointer; position: relative; overflow: hidden;
+}
+.app-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.app-card.cyan-a::before { background: var(--quantum-cyan); }
+.app-card.magenta-a::before { background: var(--quantum-magenta); }
+.app-card.green-a::before { background: var(--quantum-green); }
+.app-card.violet-a::before { background: var(--quantum-violet); }
+.app-card.yellow-a::before { background: var(--quantum-yellow); }
+.app-card.indigo-a::before { background: var(--quantum-indigo); }
+.app-card:hover { background: var(--bg-raised); transform: translateY(-4px); }
+.app-icon { font-size: 2.5rem; margin-bottom: 1.2rem; }
+.app-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; }
+.app-summary { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+.app-data { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--quantum-cyan); margin-top: 1rem; opacity: 0.8; }
+
+/* ============================================
+   SECTION 7: CHALLENGES
+   ============================================ */
+#challenges { background: var(--bg-void); }
+.challenges-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+.challenge-block { margin-bottom: 2.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--border-subtle); }
+.challenge-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.challenge-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--quantum-cyan); margin-bottom: 0.75rem; letter-spacing: 0.05em; }
+.challenge-body { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.75; }
+.temp-chart { }
+.temp-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+.temp-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); width: 160px; flex-shrink: 0; }
+.temp-bar-wrap { flex: 1; height: 20px; background: rgba(255,255,255,0.03); position: relative; overflow: hidden; }
+.temp-bar-fill { height: 100%; transform: scaleX(0); transform-origin: left; transition: transform 1.5s cubic-bezier(0.4,0,0.2,1); }
+.temp-val { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-muted); width: 90px; flex-shrink: 0; text-align: right; }
+.temp-callout {
+  background: rgba(0,245,255,0.04); border: 1px solid var(--border-active);
+  padding: 1.25rem 1.5rem; margin-top: 2rem;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--quantum-cyan);
+  line-height: 1.6;
+}
+.pull-quote {
+  padding: clamp(4rem, 8vh, 7rem) clamp(1.5rem, 5vw, 5rem);
+  background: linear-gradient(180deg, var(--bg-void) 0%, rgba(139,92,246,0.04) 50%, var(--bg-void) 100%);
+  text-align: center; position: relative; overflow: hidden;
+}
+.pull-quote::before {
+  content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 600px; height: 300px; background: radial-gradient(ellipse, rgba(139,92,246,0.08), transparent);
+  pointer-events: none;
+}
+.pull-quote blockquote {
+  font-family: 'DM Sans', sans-serif; font-weight: 300; font-style: italic;
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem); color: var(--text-primary); max-width: 800px;
+  margin: 0 auto; line-height: 1.65; position: relative; z-index: 1;
+}
+.pull-quote cite { display: block; margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--quantum-cyan); font-style: normal; letter-spacing: 0.1em; }
+
+/* ============================================
+   SECTION 8: FUTURE
+   ============================================ */
+#future { background: var(--bg-deep); }
+.roadmap { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1.5px; background: var(--border-subtle); margin: 3rem 0; }
+.roadmap-card {
+  background: var(--bg-surface); padding: 2rem 1.5rem; position: relative;
+  transition: background 0.3s;
+}
+.roadmap-card:hover { background: var(--bg-raised); }
+.roadmap-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--quantum-cyan), var(--quantum-violet)); opacity: 0.5; }
+.roadmap-year { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--quantum-cyan); margin-bottom: 0.5rem; }
+.roadmap-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; margin-bottom: 0.5rem; }
+.roadmap-body { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6; }
+.qday-panel {
+  background: rgba(224,64,251,0.06); border-left: 4px solid var(--quantum-magenta);
+  padding: 2rem 2.5rem; margin: 3rem 0;
+}
+.qday-heading { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--quantum-magenta); letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+.qday-body { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.75; max-width: 700px; }
+.qday-body strong { color: var(--text-primary); }
+/* Scenario tabs */
+.scenario-tabs { margin-top: 3rem; }
+.tab-buttons { display: flex; gap: 0; border-bottom: 1px solid var(--border-subtle); margin-bottom: 0; }
+.tab-btn {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 0.85rem; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--text-muted); background: none; border: none;
+  padding: 0.75rem 1.5rem; cursor: pointer; position: relative; transition: color 0.2s;
+}
+.tab-btn::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+  background: var(--quantum-cyan); transform: scaleX(0); transform-origin: left; transition: transform 0.3s;
+}
+.tab-btn.active { color: var(--quantum-cyan); }
+.tab-btn.active::after { transform: scaleX(1); }
+.tab-content { display: none; padding: 2rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-top: none; }
+.tab-content.active { display: block; }
+.tab-content p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.8; }
+.tab-content p strong { color: var(--text-primary); }
+
+/* ============================================
+   SECTION 9: QUANTUM RACE
+   ============================================ */
+#quantum-race { background: var(--bg-void); }
+.world-map-container { position: relative; margin: 3rem 0; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 2rem; overflow: hidden; }
+.world-map-svg { width: 100%; height: auto; max-height: 350px; }
+.map-dot { cursor: pointer; }
+.map-dot circle { transition: r 0.2s; }
+.map-dot:hover circle:first-child { r: 10; }
+.map-tooltip {
+  position: absolute; background: var(--bg-raised); border: 1px solid var(--border-active);
+  padding: 0.5rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+  color: var(--quantum-cyan); pointer-events: none; z-index: 10; white-space: nowrap;
+  opacity: 0; transition: opacity 0.2s;
+}
+@keyframes radarPulse { 0% { r: 0; opacity: 0.6; } 100% { r: 25; opacity: 0; } }
+.radar-ring { animation: radarPulse 2s ease-out infinite; }
+.investment-bars { margin-top: 3rem; }
+.inv-row { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.25rem; }
+.inv-country { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-secondary); width: 80px; flex-shrink: 0; }
+.inv-bar-wrap { flex: 1; height: 24px; background: rgba(255,255,255,0.03); overflow: hidden; }
+.inv-bar { height: 100%; background: linear-gradient(90deg, var(--quantum-cyan), var(--quantum-indigo)); transform: scaleX(0); transform-origin: left; transition: transform 1.5s cubic-bezier(0.4,0,0.2,1); }
+.inv-amount { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--quantum-cyan); width: 60px; flex-shrink: 0; }
+
+/* ============================================
+   SECTION 10: INTERACTIVE DEMO
+   ============================================ */
+#interactive-demo { background: var(--bg-deep); }
+.demo-tabs .tab-buttons { margin-bottom: 0; }
+.demo-content { background: var(--bg-raised); border: 1px solid var(--border-active); border-top: 2px solid var(--quantum-cyan); padding: 2.5rem; }
+/* Superposition demo */
+.bloch-demo { display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+.bloch-visual { width: 160px; height: 160px; position: relative; }
+.bloch-sphere-3d {
+  width: 160px; height: 160px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, rgba(0,245,255,0.2) 0%, rgba(0,0,0,0) 60%),
+              radial-gradient(circle at 55% 60%, rgba(139,92,246,0.15) 0%, rgba(0,0,0,0) 50%),
+              rgba(13,13,36,0.8);
+  border: 1.5px solid var(--border-active);
+  box-shadow: 0 0 40px rgba(0,245,255,0.15), inset 0 0 30px rgba(0,245,255,0.05);
+  position: relative; overflow: hidden; transition: all 0.5s;
+}
+.bloch-equator {
+  position: absolute; width: 100%; height: 1px; top: 50%;
+  background: rgba(0,245,255,0.2);
+}
+.bloch-meridian {
+  position: absolute; width: 1px; height: 100%; left: 50%;
+  background: rgba(0,245,255,0.15);
+}
+.bloch-state-dot {
+  position: absolute; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--quantum-cyan); box-shadow: var(--glow-cyan);
+  transform: translateX(-50%); transition: all 0.7s cubic-bezier(0.4,0,0.2,1);
+  left: 50%;
+}
+.bloch-state-dot.north { top: 8px; }
+.bloch-state-dot.south { bottom: 8px; }
+.bloch-state-dot.equator { top: 50%; transform: translate(-50%, -50%); animation: blochWobble 2s ease-in-out infinite; }
+@keyframes blochWobble { 0%,100% { left: 50%; } 50% { left: 60%; } }
+.prob-bar-container { width: 200px; }
+.prob-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; justify-content: space-between; }
+.prob-track { width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 0; overflow: hidden; }
+.prob-fill { height: 100%; background: linear-gradient(90deg, var(--quantum-cyan), var(--quantum-violet)); transition: width 0.7s; }
+.demo-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+.demo-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em;
+  padding: 10px 20px; border: 1px solid var(--border-active); background: transparent;
+  color: var(--quantum-cyan); cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+}
+.demo-btn:hover { background: rgba(0,245,255,0.1); }
+.demo-result { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; color: var(--quantum-yellow); text-align: center; min-height: 2rem; transition: all 0.3s; }
+
+/* Encryption calculator */
+.enc-calc { display: flex; flex-direction: column; gap: 2rem; }
+.enc-slider-wrap { }
+.enc-slider-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.75rem; display: flex; justify-content: space-between; }
+.enc-slider { width: 100%; -webkit-appearance: none; height: 2px; background: var(--border-active); outline: none; }
+.enc-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--quantum-cyan); cursor: pointer; box-shadow: var(--glow-cyan); }
+.enc-results { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5px; background: var(--border-subtle); }
+.enc-result-card { background: var(--bg-surface); padding: 1.5rem; }
+.enc-type { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.enc-type.c { color: var(--text-muted); }
+.enc-type.q { color: var(--quantum-cyan); }
+.enc-time { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+.enc-result-card.classical .enc-time { color: var(--text-secondary); }
+.enc-result-card.quantum .enc-time { color: var(--quantum-cyan); }
+
+/* Racing demo */
+.race-demo { }
+.race-arena { background: var(--bg-void); border: 1px solid var(--border-subtle); padding: 2rem; position: relative; height: 200px; overflow: hidden; }
+.race-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+.race-track { height: 60px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); position: absolute; width: calc(100% - 4rem); border-radius: 2px; }
+.race-track.classical-track { top: 1rem; left: 2rem; }
+.race-track.quantum-track { top: 5rem; left: 2rem; }
+.racer { position: absolute; height: 24px; top: 50%; transform: translateY(-50%); transition: width 0.05s; display: flex; align-items: center; padding-left: 0.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; }
+.classical-racer { background: rgba(100,100,130,0.4); color: var(--text-muted); }
+.quantum-racer { background: rgba(0,245,255,0.15); color: var(--quantum-cyan); box-shadow: 0 0 15px rgba(0,245,255,0.2); }
+.race-start-btn { margin-top: 1rem; }
+
+/* ============================================
+   SECTION 11: GLOSSARY
+   ============================================ */
+#glossary { background: var(--bg-void); }
+.glossary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-subtle); margin-top: 3rem; }
+.gloss-card {
+  background: var(--bg-surface); padding: 1.5rem; cursor: pointer;
+  transition: background 0.2s; position: relative;
+  border-left: 2px solid transparent; transition: border-color 0.2s, background 0.2s;
+}
+.gloss-card.active, .gloss-card:hover { background: var(--bg-raised); border-left-color: var(--quantum-cyan); }
+.gloss-term { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.3rem; }
+.gloss-short { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+.gloss-expanded { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+.gloss-card.active .gloss-expanded { max-height: 200px; }
+.gloss-full { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; padding-top: 0.75rem; margin-top: 0.75rem; border-top: 1px solid var(--border-subtle); }
+.gloss-fact { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--quantum-cyan); margin-top: 0.5rem; }
+
+/* ============================================
+   SECTION 12: CTA
+   ============================================ */
+#cta-section {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-void); position: relative; overflow: hidden;
+  text-align: center;
+}
+#cta-canvas { position: absolute; inset: 0; opacity: 0.5; }
+.cta-glow-tl { width: 400px; height: 400px; background: rgba(0,245,255,0.06); top: -100px; left: -100px; z-index: 1; }
+.cta-glow-tr { width: 400px; height: 400px; background: rgba(139,92,246,0.06); top: -100px; right: -100px; z-index: 1; }
+.cta-glow-bl { width: 300px; height: 300px; background: rgba(224,64,251,0.05); bottom: -50px; left: -50px; z-index: 1; }
+.cta-glow-br { width: 300px; height: 300px; background: rgba(79,70,229,0.05); bottom: -50px; right: -50px; z-index: 1; }
+.cta-content { position: relative; z-index: 2; max-width: 700px; padding: 0 1.5rem; }
+.cta-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 0.75rem; letter-spacing: 0.35em; color: var(--quantum-cyan); text-transform: uppercase; margin-bottom: 2rem; }
+.cta-title { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: var(--font-chapter); line-height: 1.1; margin-bottom: 2rem; }
+.cta-body { font-size: var(--font-body); color: var(--text-secondary); line-height: 1.85; margin-bottom: 3rem; }
+.cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+.btn-primary { background: var(--quantum-cyan); color: var(--bg-void); padding: 14px 36px; border-radius: 2px; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.3s; font-weight: 600; }
+.btn-primary:hover { box-shadow: var(--glow-cyan); transform: translateY(-2px); }
+.btn-secondary { background: transparent; color: var(--text-secondary); padding: 14px 36px; border-radius: 2px; font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; border: 1.5px solid var(--border-active); transition: all 0.3s; }
+.btn-secondary:hover { color: var(--quantum-cyan); border-color: var(--quantum-cyan); }
+.cta-divider { width: 200px; height: 1px; background: rgba(0,245,255,0.2); margin: 0 auto 1.5rem; }
+.cta-credits { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.1em; }
+
+/* ============================================
+   FOOTER
+   ============================================ */
+footer {
+  background: var(--bg-void); border-top: 1px solid var(--border-subtle);
+  padding: clamp(3rem, 6vh, 5rem) clamp(1.5rem, 5vw, 5rem) 1.5rem;
+}
+.footer-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4rem; margin-bottom: 3rem; }
+.footer-logo { font-family: 'JetBrains Mono', monospace; color: var(--quantum-cyan); font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+.footer-logo .q-mark { width: 36px; height: 36px; border: 1.5px solid var(--quantum-cyan); display: flex; align-items: center; justify-content: center; }
+.footer-tagline { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0.75rem; }
+.footer-built { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; }
+.footer-nav-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1.25rem; }
+.footer-nav-links { display: flex; flex-direction: column; gap: 0.6rem; }
+.footer-nav-links a { font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+.footer-nav-links a:hover { color: var(--quantum-cyan); }
+.footer-sources-title { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1.25rem; }
+.footer-source { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 0.4rem; }
+.footer-bottom { border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.1em; }
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .bento-grid { grid-template-columns: 1fr 1fr; }
+  .apps-grid { grid-template-columns: 1fr 1fr; }
+  .roadmap { grid-template-columns: repeat(3, 1fr); }
+  .challenges-grid { grid-template-columns: 1fr; gap: 3rem; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .chapter-layout { grid-template-columns: 1fr; gap: 2rem; }
+  .chapter-num { font-size: 5rem; }
+  .bento-grid { grid-template-columns: 1fr; gap: 1px; }
+  .cvq-split { grid-template-columns: 1fr; }
+  .cvq-divider { display: none; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .timeline { }
+  .timeline-spine { left: 20px; }
+  .timeline-event { grid-template-columns: 1fr; padding-left: 50px; }
+  .timeline-event.right .event-card, .timeline-event.left .event-card { grid-column: 1; text-align: left; }
+  .timeline-event.right .event-dot, .timeline-event.left .event-dot { left: calc(-30px - 6px); right: auto; }
+  .apps-grid { grid-template-columns: 1fr; }
+  .roadmap { grid-template-columns: 1fr 1fr; }
+  .footer-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+  .glossary-grid { grid-template-columns: 1fr 1fr; }
+  .enc-results { grid-template-columns: 1fr; }
+  .world-map-svg { max-height: 200px; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .roadmap { grid-template-columns: 1fr; }
+  .glossary-grid { grid-template-columns: 1fr; }
+  .cta-btns { flex-direction: column; align-items: center; }
+}
+
+/* ============================================
+   UTILITY ANIMATIONS
+   ============================================ */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,245,255,0.2); }
+  50% { box-shadow: 0 0 40px rgba(0,245,255,0.5); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes glitch {
+  0%, 90%, 100% { transform: translate(0); clip-path: none; }
+  91% { transform: translate(-2px, 0); clip-path: inset(20% 0 60% 0); }
+  93% { transform: translate(2px, 0); clip-path: inset(50% 0 30% 0); }
+  95% { transform: translate(-1px, 0); clip-path: inset(10% 0 80% 0); }
+}
+.glitch-text { animation: glitch 5s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- NOISE OVERLAY -->
+<div class="noise-overlay"></div>
+
+<!-- CURSOR -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- SCROLL PROGRESS -->
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="chapter-indicator" id="chapterIndicator">CH 00 / 08</div>
+
+<!-- PRELOADER -->
+<div id="preloader">
+  <div class="preloader-counter" id="preloaderCounter">000</div>
+  <div class="preloader-brackets">[ &nbsp; ]</div>
+  <div class="preloader-text">INITIALIZING QUANTUM SYSTEM...</div>
+  <div class="preloader-bar-wrap"><div class="preloader-bar"></div></div>
+</div>
+
+<!-- NAVIGATION -->
+<nav id="mainNav">
+  <a href="#hero" class="nav-logo">
+    <div class="q-mark">Q</div>
+    <span>QUANTUM LEAP</span>
+  </a>
+  <div class="nav-links">
+    <a href="#problem" data-chapter="0">00 Problem</a>
+    <a href="#quantum-science" data-chapter="1">01 Science</a>
+    <a href="#how-it-works" data-chapter="2">02 Process</a>
+    <a href="#data-section" data-chapter="3">03 Data</a>
+    <a href="#applications" data-chapter="4">04 Impact</a>
+    <a href="#future" data-chapter="5">05 Future</a>
+    <a href="#quantum-race" data-chapter="6">06 Race</a>
+    <a href="#interactive-demo" data-chapter="7">07 Demo</a>
+  </div>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#problem" onclick="closeMobileMenu()">00 — The Problem</a>
+  <a href="#quantum-science" onclick="closeMobileMenu()">01 — The Science</a>
+  <a href="#how-it-works" onclick="closeMobileMenu()">02 — The Process</a>
+  <a href="#data-section" onclick="closeMobileMenu()">03 — The Data</a>
+  <a href="#applications" onclick="closeMobileMenu()">04 — Applications</a>
+  <a href="#challenges" onclick="closeMobileMenu()">05 — Challenges</a>
+  <a href="#future" onclick="closeMobileMenu()">06 — The Future</a>
+  <a href="#quantum-race" onclick="closeMobileMenu()">07 — Global Race</a>
+  <a href="#interactive-demo" onclick="closeMobileMenu()">08 — Demo</a>
+</div>
+
+<!-- ================================================
+     SECTION 1: HERO
+     ================================================ -->
+<section id="hero">
+  <canvas id="particle-canvas"></canvas>
+  <div class="glow-bg hero-glow-1"></div>
+  <div class="glow-bg hero-glow-2"></div>
+  <div class="hero-hexgrid"></div>
+  <div class="hero-corner tl">[</div>
+  <div class="hero-corner br">]</div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow" id="heroEyebrow">INIT 6.0 — INTERACTIVE DOCUMENTARY</div>
+    <h1 class="hero-title">
+      <div class="word the-word"><span>THE</span></div>
+      <div class="word quantum-word"><span class="glitch-text">QUANTUM</span></div>
+      <div class="word leap-word"><span>LEAP</span></div>
+    </h1>
+    <p class="hero-subtitle" id="heroSubtitle">"The Technology That Will Break Everything You Know About Computing"</p>
+    <button class="hero-cta" id="heroCta" onclick="document.getElementById('problem').scrollIntoView({behavior:'smooth'})">BEGIN THE JOURNEY ↓</button>
+  </div>
+  <div class="hero-scroll" id="heroScroll">
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 2: THE PROBLEM — CHAPTER 00
+     ================================================ -->
+<section id="problem" data-chapter="0">
+  <div class="container section-pad">
+    <div class="chapter-layout reveal">
+      <div class="chapter-label-wrap">
+        <div class="chapter-label">Chapter</div>
+        <div class="chapter-num">00</div>
+        <h2>THE<br>WALL</h2>
+      </div>
+      <div class="narrative-content">
+        <h3>"Classical Computing Has Hit a Wall"</h3>
+        <p>For 50 years, <strong>Moore's Law</strong> was the engine of the digital age — the observation that the number of transistors on a chip doubles roughly every two years. It gave us smartphones, the internet, and artificial intelligence.</p>
+        <p>But physics doesn't negotiate. Transistors are now being manufactured at <strong>2 nanometers</strong> — roughly 10 atoms wide. Quantum tunneling effects cause electrons to leak through barriers, and heat generation threatens to melt the chips themselves.</p>
+        <p>The exponential curve is flattening. The wall is real. The question is no longer <em>if</em> classical computing will run out of road — but <strong>what comes next</strong>. The answer lies not in engineering better silicon, but in harnessing the laws of quantum physics itself.</p>
+      </div>
+    </div>
+
+    <!-- Moore's Law Chart -->
+    <div class="chart-container reveal">
+      <h4>// MOORE'S LAW — TRANSISTOR COUNT PER CHIP (1970–2024)</h4>
+      <svg class="moores-chart" id="mooresChart" viewBox="0 0 900 280" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 3: QUANTUM SCIENCE — CHAPTER 01
+     ================================================ -->
+<section id="quantum-science" data-chapter="1">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">01 / UNDERSTANDING THE QUANTUM</div>
+      <h2 class="section-title"><span class="cyan">QUBITS</span> &amp; SUPERPOSITION</h2>
+    </div>
+
+    <div class="bento-grid">
+      <!-- Card 1: Superposition -->
+      <div class="bento-card cyan-top reveal">
+        <svg class="card-icon" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="30" r="22" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+          <ellipse cx="30" cy="30" rx="22" ry="8" stroke="rgba(0,245,255,0.2)" stroke-width="1"/>
+          <circle cx="30" cy="8" r="4" fill="var(--quantum-cyan)" opacity="0.8"/>
+          <circle cx="30" cy="52" r="4" fill="rgba(0,245,255,0.3)"/>
+          <line x1="30" y1="8" x2="30" y2="52" stroke="var(--quantum-cyan)" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+        </svg>
+        <div class="card-title">SUPERPOSITION</div>
+        <div class="card-body">A qubit isn't locked to 0 or 1 — it exists in a probability cloud of both states simultaneously. Like a coin spinning in midair, it's only when you observe it that it "decides" to be heads or tails.</div>
+        <svg class="wave-svg" viewBox="0 0 200 50">
+          <path class="wave-path" d="M0,25 C25,5 50,45 75,25 S125,5 150,25 S175,45 200,25" stroke="var(--quantum-cyan)" stroke-width="1.5" fill="none" opacity="0.6"/>
+        </svg>
+        <div class="card-stat">1 qubit = 2 states<br>300 qubits = more states than atoms in the observable universe</div>
+      </div>
+
+      <!-- Card 2: Entanglement -->
+      <div class="bento-card violet-top reveal">
+        <div style="width:60px;height:60px;position:relative;margin-bottom:1.5rem">
+          <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+            <circle cx="15" cy="30" r="10" stroke="var(--quantum-cyan)" stroke-width="1.5" opacity="0.7"/>
+            <circle cx="45" cy="30" r="10" stroke="var(--quantum-violet)" stroke-width="1.5" opacity="0.7"/>
+            <line x1="25" y1="30" x2="35" y2="30" stroke="var(--quantum-magenta)" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <circle cx="15" cy="30" r="4" fill="var(--quantum-cyan)" opacity="0.9">
+              <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="45" cy="30" r="4" fill="var(--quantum-violet)" opacity="0.9">
+              <animate attributeName="r" values="5;3;5" dur="2s" repeatCount="indefinite"/>
+            </circle>
+          </svg>
+        </div>
+        <div class="card-title">ENTANGLEMENT</div>
+        <div class="card-body">Two entangled qubits are forever linked — measure one and you instantly know the state of the other, regardless of distance. Einstein famously called it "spooky action at a distance."</div>
+        <div class="card-stat" style="color:var(--quantum-violet)">— Albert Einstein, 1935<br><em style="opacity:0.7">"The most puzzling feature of quantum mechanics"</em></div>
+      </div>
+
+      <!-- Card 3: Interference -->
+      <div class="bento-card magenta-top reveal">
+        <svg class="card-icon" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5,30 C12,15 19,45 26,30 S40,15 47,30 S54,45 60,30" stroke="var(--quantum-cyan)" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <path d="M5,30 C12,45 19,15 26,30 S40,45 47,30 S54,15 60,30" stroke="var(--quantum-violet)" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <path d="M5,30 L60,30" stroke="var(--quantum-magenta)" stroke-width="2" fill="none" opacity="0.3"/>
+          <circle cx="30" cy="30" r="4" fill="var(--quantum-magenta)" opacity="0.8"/>
+        </svg>
+        <div class="card-title">INTERFERENCE</div>
+        <div class="card-body">Quantum algorithms harness wave interference to amplify paths leading to correct answers and cancel paths leading to wrong ones — like noise-canceling headphones, but for computation.</div>
+        <div class="card-stat" style="color:var(--quantum-magenta)">✓ Correct paths: AMPLIFIED<br>✗ Wrong paths: CANCELLED</div>
+      </div>
+    </div>
+
+    <!-- Classical vs Quantum -->
+    <div class="cvq-split reveal" style="margin-top:3rem">
+      <div class="cvq-side">
+        <div class="cvq-label">Classical Bit</div>
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <rect x="25" y="15" width="30" height="50" rx="4" fill="none" stroke="rgba(150,150,180,0.4)" stroke-width="1.5"/>
+          <rect x="30" y="25" width="20" height="20" fill="rgba(150,150,180,0.2)" rx="2"/>
+          <text x="40" y="38" text-anchor="middle" fill="var(--text-muted)" font-family="JetBrains Mono" font-size="10">0|1</text>
+        </svg>
+        <div class="cvq-big classical">0 or 1</div>
+        <div class="cvq-scale">One path at a time<br>Sequential processing<br>Deterministic</div>
+      </div>
+      <div class="cvq-divider">
+        <div class="cvq-vs">VS</div>
+      </div>
+      <div class="cvq-side">
+        <div class="cvq-label">Qubit</div>
+        <svg width="80" height="80" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="28" fill="none" stroke="rgba(0,245,255,0.3)" stroke-width="1.5"/>
+          <ellipse cx="40" cy="40" rx="28" ry="10" fill="none" stroke="rgba(0,245,255,0.15)" stroke-width="1"/>
+          <circle cx="40" cy="12" r="5" fill="var(--quantum-cyan)" opacity="0.9"/>
+          <animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 40 40" to="360 40 40" dur="6s" repeatCount="indefinite"/>
+        </svg>
+        <div class="cvq-big quantum">0, 1, or BOTH</div>
+        <div class="cvq-scale" style="color:var(--quantum-cyan)">All paths simultaneously<br>Parallel quantum states<br>Probabilistic</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 4: HOW IT WORKS — CHAPTER 02
+     ================================================ -->
+<section id="how-it-works" data-chapter="2">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">02 / THE QUANTUM CIRCUIT</div>
+      <h2 class="section-title">HOW IT <span class="cyan">ACTUALLY</span> WORKS</h2>
+      <p class="section-subtitle">A quantum computation unfolds in six precise steps — from initialization to the moment of truth.</p>
+    </div>
+  </div>
+
+  <!-- Horizontal panels (desktop) -->
+  <div class="horiz-scroll-outer">
+    <div class="horiz-panels" id="horizPanels">
+      <!-- Panel 1 -->
+      <div class="horiz-panel">
+        <div class="panel-num">01</div>
+        <div class="panel-step">STEP 01 / INITIALIZATION</div>
+        <h3 class="panel-title">Ground State<br>|0⟩</h3>
+        <p class="panel-body">All qubits are initialized to the ground state — like setting all RAM to zero before a computation begins. The quantum circuit is blank, waiting.</p>
+        <div class="qubit-row">
+          <div class="qubit zero">|0⟩</div>
+          <div class="qubit zero">|0⟩</div>
+          <div class="qubit zero">|0⟩</div>
+          <div class="qubit zero">|0⟩</div>
+          <div class="qubit zero">|0⟩</div>
+          <div class="qubit zero">|0⟩</div>
+          <div class="qubit zero">|0⟩</div>
+          <div class="qubit zero">|0⟩</div>
+        </div>
+      </div>
+      <!-- Panel 2 -->
+      <div class="horiz-panel">
+        <div class="panel-num">02</div>
+        <div class="panel-step">STEP 02 / HADAMARD GATE</div>
+        <h3 class="panel-title">Superposition<br>Applied</h3>
+        <p class="panel-body">Hadamard gates put each qubit into superposition — simultaneously exploring ALL possible states. With 8 qubits, the system now holds 256 values at once.</p>
+        <div class="qubit-row">
+          <div class="qubit super">|+⟩</div>
+          <div class="qubit super">|+⟩</div>
+          <div class="qubit super">|+⟩</div>
+          <div class="qubit super">|+⟩</div>
+          <div class="qubit super">|+⟩</div>
+          <div class="qubit super">|+⟩</div>
+          <div class="qubit super">|+⟩</div>
+          <div class="qubit super">|+⟩</div>
+        </div>
+      </div>
+      <!-- Panel 3 -->
+      <div class="horiz-panel">
+        <div class="panel-num">03</div>
+        <div class="panel-step">STEP 03 / CNOT GATE</div>
+        <h3 class="panel-title">Entanglement<br>Created</h3>
+        <p class="panel-body">CNOT gates entangle pairs of qubits, creating quantum correlations that link their fates. The state of one instantly determines the other — no matter the separation.</p>
+        <div class="qubit-row">
+          <div class="qubit entangled">⟨Ψ⟩</div>
+          <div class="qubit entangled">⟨Ψ⟩</div>
+          <div class="qubit entangled">⟨Ψ⟩</div>
+          <div class="qubit entangled">⟨Ψ⟩</div>
+          <div class="qubit entangled">⟨Ψ⟩</div>
+          <div class="qubit entangled">⟨Ψ⟩</div>
+          <div class="qubit entangled">⟨Ψ⟩</div>
+          <div class="qubit entangled">⟨Ψ⟩</div>
+        </div>
+      </div>
+      <!-- Panel 4 -->
+      <div class="horiz-panel">
+        <div class="panel-num">04</div>
+        <div class="panel-step">STEP 04 / ORACLE</div>
+        <h3 class="panel-title">Interference<br>Applied</h3>
+        <p class="panel-body">The oracle marks correct solutions and quantum interference amplifies their probability while canceling wrong answers. Signal emerges from quantum noise.</p>
+        <div class="qubit-row">
+          <div class="qubit super">⊕</div>
+          <div class="qubit zero" style="opacity:0.2">✕</div>
+          <div class="qubit super">⊕</div>
+          <div class="qubit zero" style="opacity:0.2">✕</div>
+          <div class="qubit super" style="box-shadow:0 0 25px rgba(0,245,255,0.6)">⊕</div>
+          <div class="qubit zero" style="opacity:0.2">✕</div>
+          <div class="qubit super">⊕</div>
+          <div class="qubit zero" style="opacity:0.2">✕</div>
+        </div>
+      </div>
+      <!-- Panel 5 -->
+      <div class="horiz-panel">
+        <div class="panel-num">05</div>
+        <div class="panel-step">STEP 05 / MEASUREMENT</div>
+        <h3 class="panel-title">Superposition<br>Collapses</h3>
+        <p class="panel-body">The moment of truth. Observing the qubits forces them to "decide" — the quantum probability cloud collapses to a single definite state. The answer emerges.</p>
+        <div class="qubit-row">
+          <div class="qubit collapsed">1</div>
+          <div class="qubit collapsed">0</div>
+          <div class="qubit collapsed">1</div>
+          <div class="qubit collapsed">1</div>
+          <div class="qubit collapsed">0</div>
+          <div class="qubit collapsed">1</div>
+          <div class="qubit collapsed">0</div>
+          <div class="qubit collapsed">0</div>
+        </div>
+      </div>
+      <!-- Panel 6 -->
+      <div class="horiz-panel">
+        <div class="panel-num">06</div>
+        <div class="panel-step">STEP 06 / OUTPUT</div>
+        <h3 class="panel-title">Answer<br>Emerges</h3>
+        <p class="panel-body">In microseconds, the quantum algorithm has explored all possible solutions simultaneously and delivered the optimal answer — a computation that would take classical computers thousands of years.</p>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:2rem;color:var(--quantum-cyan);letter-spacing:0.2em;text-shadow:var(--glow-cyan)">10110100</div>
+        <p style="font-size:0.8rem;color:var(--quantum-green);margin-top:1rem;font-family:'JetBrains Mono',monospace">✓ SOLUTION FOUND</p>
+      </div>
+    </div>
+    <div class="horiz-progress"><div class="horiz-progress-bar" id="horizProgressBar"></div></div>
+    <div class="scroll-hint">← SCROLL TO EXPLORE THE QUANTUM PROCESS →</div>
+  </div>
+
+  <!-- Mobile vertical fallback -->
+  <div class="container">
+    <div class="vertical-panels">
+      <div class="vert-panel"><div class="panel-step">STEP 01</div><h4>Initialization |0⟩</h4><p>All qubits begin in the ground state — a blank quantum slate, ready for computation.</p></div>
+      <div class="vert-panel"><div class="panel-step">STEP 02</div><h4>Hadamard Gate — Superposition</h4><p>Hadamard gates launch each qubit into superposition, exploring all states simultaneously.</p></div>
+      <div class="vert-panel"><div class="panel-step">STEP 03</div><h4>CNOT Gate — Entanglement</h4><p>Pairs of qubits become entangled — their fates linked across the quantum circuit.</p></div>
+      <div class="vert-panel"><div class="panel-step">STEP 04</div><h4>Oracle — Interference</h4><p>Quantum interference amplifies correct paths and cancels incorrect ones.</p></div>
+      <div class="vert-panel"><div class="panel-step">STEP 05</div><h4>Measurement — Collapse</h4><p>Observation forces the quantum probability cloud to collapse to a definite answer.</p></div>
+      <div class="vert-panel"><div class="panel-step">STEP 06</div><h4>Output — The Answer</h4><p>The solution emerges in microseconds — what would take classical computers years, done instantly.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 5: DATA — CHAPTER 03
+     ================================================ -->
+<section id="data-section" data-chapter="3">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">03 / REAL NUMBERS</div>
+      <h2 class="section-title">BY THE <span class="cyan">NUMBERS</span></h2>
+      <p class="section-subtitle">"The cold, hard quantum facts."</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="margin-top:3rem">
+      <div class="stat-card reveal">
+        <span class="stat-num" data-target="433" data-suffix="+">0</span>
+        <div class="stat-label">Qubits in IBM<br>Condor processor</div>
+      </div>
+      <div class="stat-card reveal">
+        <span class="stat-num" data-val="10000x">10,000×</span>
+        <div class="stat-label">Faster than best<br>classical computer</div>
+      </div>
+      <div class="stat-card reveal">
+        <span class="stat-num" data-target="100000" data-suffix="">0</span>
+        <div class="stat-label">Qubit IBM<br>roadmap 2033</div>
+      </div>
+      <div class="stat-card reveal">
+        <span class="stat-num" data-val="$850B+">$850B+</span>
+        <div class="stat-label">Projected market<br>value by 2040</div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-section" style="margin-top:5rem">
+      <div class="timeline-title reveal">
+        <div class="eyebrow">Quantum Milestones</div>
+        <h3 class="section-title" style="font-size:var(--font-h2)">THE <span class="cyan">JOURNEY</span></h3>
+      </div>
+
+      <div class="timeline" id="quantumTimeline">
+        <div class="timeline-spine" id="timelineSpine"></div>
+        <div class="timeline-event right reveal">
+          <div class="event-card"><div class="event-dot"></div>
+            <div class="event-year">1981</div>
+            <div class="event-title">Feynman's Vision</div>
+            <div class="event-body">Richard Feynman proposes that quantum systems could simulate other quantum systems — the conceptual birth of quantum computing.</div>
+          </div>
+        </div>
+        <div class="timeline-event left reveal">
+          <div class="event-card"><div class="event-dot"></div>
+            <div class="event-year">1994</div>
+            <div class="event-title">Shor's Algorithm</div>
+            <div class="event-body">Peter Shor publishes an algorithm that could factor huge numbers exponentially faster than any classical computer — sending cryptographers into a cold sweat.</div>
+          </div>
+        </div>
+        <div class="timeline-event right reveal">
+          <div class="event-card"><div class="event-dot"></div>
+            <div class="event-year">1998</div>
+            <div class="event-title">First Quantum Computer</div>
+            <div class="event-body">Oxford University builds the world's first 2-qubit quantum computer — a proof of concept that would change everything.</div>
+          </div>
+        </div>
+        <div class="timeline-event left reveal">
+          <div class="event-card"><div class="event-dot"></div>
+            <div class="event-year">2001</div>
+            <div class="event-title">IBM Runs Shor's Algorithm</div>
+            <div class="event-body">IBM successfully executes Shor's algorithm on a 7-qubit system, demonstrating real-world quantum computation for the first time.</div>
+          </div>
+        </div>
+        <div class="timeline-event right reveal">
+          <div class="event-card"><div class="event-dot"></div>
+            <div class="event-year">2019</div>
+            <div class="event-title">Google Claims Supremacy</div>
+            <div class="event-body">Google's 53-qubit Sycamore processor completes in 200 seconds a calculation that would take classical supercomputers 10,000 years — a historic milestone.</div>
+          </div>
+        </div>
+        <div class="timeline-event left reveal">
+          <div class="event-card"><div class="event-dot"></div>
+            <div class="event-year">2021</div>
+            <div class="event-title">IBM Eagle — 127 Qubits</div>
+            <div class="event-body">IBM's Eagle processor crosses 100 qubits, the threshold where classical computers can no longer fully simulate quantum systems.</div>
+          </div>
+        </div>
+        <div class="timeline-event right reveal">
+          <div class="event-card"><div class="event-dot"></div>
+            <div class="event-year">2023</div>
+            <div class="event-title">IBM Condor — 433 Qubits</div>
+            <div class="event-body">IBM releases Condor (433 qubits) alongside Heron — a new error-corrected architecture marking the transition to practical quantum advantage.</div>
+          </div>
+        </div>
+        <div class="timeline-event left reveal">
+          <div class="event-card"><div class="event-dot"></div>
+            <div class="event-year">2024</div>
+            <div class="event-title">Google Willow</div>
+            <div class="event-body">Google's Willow chip (105 qubits) achieves breakthrough error correction — solving a benchmark problem faster than any classical computer could in the age of the universe.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Power comparison -->
+    <div class="power-chart reveal">
+      <div class="power-chart-title">
+        <div class="eyebrow">Computational Power</div>
+        <h3 class="section-title" style="font-size:var(--font-h2)">QUANTUM <span class="cyan">ADVANTAGE</span></h3>
+      </div>
+      <div id="powerBars">
+        <div class="chart-row">
+          <div class="chart-row-label">Factor 2048-bit number</div>
+          <div class="bar-wrap">
+            <div class="bar-item"><div class="bar-item-label">Classical</div><div class="bar classical" style="width:0%" data-width="95%"><span class="bar-value">~300 trillion years</span></div></div>
+            <div class="bar-item"><div class="bar-item-label">Quantum</div><div class="bar quantum" style="width:0%" data-width="8%"><span class="bar-value">~hours</span></div></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-row-label">Simulate drug molecule</div>
+          <div class="bar-wrap">
+            <div class="bar-item"><div class="bar-item-label">Classical</div><div class="bar classical" style="width:0%" data-width="85%"><span class="bar-value">Practically impossible</span></div></div>
+            <div class="bar-item"><div class="bar-item-label">Quantum</div><div class="bar quantum" style="width:0%" data-width="12%"><span class="bar-value">Minutes</span></div></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-row-label">Global supply chain optimization</div>
+          <div class="bar-wrap">
+            <div class="bar-item"><div class="bar-item-label">Classical</div><div class="bar classical" style="width:0%" data-width="60%"><span class="bar-value">Days</span></div></div>
+            <div class="bar-item"><div class="bar-item-label">Quantum</div><div class="bar quantum" style="width:0%" data-width="5%"><span class="bar-value">Seconds</span></div></div>
+          </div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-row-label">Break RSA-2048 encryption</div>
+          <div class="bar-wrap">
+            <div class="bar-item"><div class="bar-item-label">Classical</div><div class="bar classical" style="width:0%" data-width="99%"><span class="bar-value">~10 billion years</span></div></div>
+            <div class="bar-item"><div class="bar-item-label">Quantum</div><div class="bar quantum" style="width:0%" data-width="3%"><span class="bar-value">~10 minutes</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 6: APPLICATIONS — CHAPTER 04
+     ================================================ -->
+<section id="applications" data-chapter="4">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">04 / REAL-WORLD IMPACT</div>
+      <h2 class="section-title">WHERE QUANTUM <span class="cyan">CHANGES</span> EVERYTHING</h2>
+    </div>
+
+    <div class="apps-grid">
+      <div class="app-card magenta-a reveal">
+        <div class="app-icon">🔐</div>
+        <div class="app-title">Cryptography</div>
+        <div class="app-summary">Most current encryption will be shattered. Post-quantum cryptography is now a national security imperative — governments worldwide are racing to upgrade their systems before it's too late.</div>
+        <div class="app-data">NIST released 4 post-quantum standards in 2024</div>
+      </div>
+      <div class="app-card cyan-a reveal">
+        <div class="app-icon">💊</div>
+        <div class="app-title">Drug Discovery</div>
+        <div class="app-summary">Quantum computers can simulate molecular interactions at the atomic level — redesigning medicine from atoms up. What takes 12 years in a classical lab could take under 2 years with quantum.</div>
+        <div class="app-data">Potential to cut drug discovery time by 80%</div>
+      </div>
+      <div class="app-card green-a reveal">
+        <div class="app-icon">🌍</div>
+        <div class="app-title">Climate Modeling</div>
+        <div class="app-summary">Quantum optimization can model Earth's climate systems with 100,000× more accuracy — enabling breakthroughs in carbon capture, renewable energy optimization, and climate prediction.</div>
+        <div class="app-data">100,000× improvement in simulation accuracy</div>
+      </div>
+      <div class="app-card violet-a reveal">
+        <div class="app-icon">🧠</div>
+        <div class="app-title">Artificial Intelligence</div>
+        <div class="app-summary">Quantum machine learning algorithms could train models that would take today's AI systems decades — in mere hours. The fusion of quantum and AI may be the most disruptive force in history.</div>
+        <div class="app-data">Quantum neural networks show 40× speedup in optimization</div>
+      </div>
+      <div class="app-card yellow-a reveal">
+        <div class="app-icon">📈</div>
+        <div class="app-title">Financial Modeling</div>
+        <div class="app-summary">Portfolio optimization across millions of correlated variables simultaneously — calculating risk exposures and arbitrage opportunities that no classical system can model in real time.</div>
+        <div class="app-data">JPMorgan, Goldman Sachs, and Citi all investing heavily</div>
+      </div>
+      <div class="app-card indigo-a reveal">
+        <div class="app-icon">🛰️</div>
+        <div class="app-title">Space &amp; Navigation</div>
+        <div class="app-summary">NASA and ESA are developing quantum navigation systems — GPS-independent positioning accurate to centimeters, using quantum entanglement to synchronize timing signals across vast distances.</div>
+        <div class="app-data">Centimeter-accurate navigation without GPS infrastructure</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 7: CHALLENGES — CHAPTER 05
+     ================================================ -->
+<section id="challenges" data-chapter="5">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">05 / THE HARD TRUTH</div>
+      <h2 class="section-title">THE <span class="cyan">OBSTACLES</span></h2>
+      <p class="section-subtitle">"Quantum computing is real — but not yet ready."</p>
+    </div>
+
+    <div class="challenges-grid" style="margin-top:3rem">
+      <div>
+        <div class="challenge-block reveal">
+          <div class="challenge-name">DECOHERENCE</div>
+          <div class="challenge-body">Qubits must be maintained at temperatures near absolute zero — 150 times colder than outer space. Any thermal vibration, electromagnetic interference, or stray photon destroys the quantum state in microseconds. The universe itself is trying to collapse your computation.</div>
+        </div>
+        <div class="challenge-block reveal">
+          <div class="challenge-name">ERROR RATES</div>
+          <div class="challenge-body">Today's best quantum chips have a 0.1–1% error rate per gate operation. This might sound small, but running thousands of gates means errors compound rapidly. Classical computers achieve 10⁻¹⁸ error rates. Quantum error correction remains the field's great unsolved engineering challenge.</div>
+        </div>
+        <div class="challenge-block reveal">
+          <div class="challenge-name">SCALABILITY</div>
+          <div class="challenge-body">Each qubit requires precise individual control systems, cryogenic cooling, and shielding from environmental noise. Current architectures can't simply be stacked — building a fault-tolerant quantum computer at scale requires engineering breakthroughs we're still developing.</div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="eyebrow" style="margin-bottom:1.5rem">Temperature Comparison</div>
+        <div class="temp-chart" id="tempChart">
+          <div class="temp-row">
+            <div class="temp-label">Surface of the Sun</div>
+            <div class="temp-bar-wrap"><div class="temp-bar-fill" style="background:linear-gradient(90deg,#FF4444,#FF8800)" data-scale="1.0"></div></div>
+            <div class="temp-val">15,000,000°C</div>
+          </div>
+          <div class="temp-row">
+            <div class="temp-label">Earth's surface</div>
+            <div class="temp-bar-wrap"><div class="temp-bar-fill" style="background:linear-gradient(90deg,#06FFA5,#00B4D8)" data-scale="0.55"></div></div>
+            <div class="temp-val">~15°C</div>
+          </div>
+          <div class="temp-row">
+            <div class="temp-label">Liquid Nitrogen</div>
+            <div class="temp-bar-wrap"><div class="temp-bar-fill" style="background:linear-gradient(90deg,#00B4D8,#0096FF)" data-scale="0.35"></div></div>
+            <div class="temp-val">−196°C</div>
+          </div>
+          <div class="temp-row">
+            <div class="temp-label">Outer Space</div>
+            <div class="temp-bar-wrap"><div class="temp-bar-fill" style="background:linear-gradient(90deg,#4F46E5,#8B5CF6)" data-scale="0.12"></div></div>
+            <div class="temp-val">−270°C</div>
+          </div>
+          <div class="temp-row">
+            <div class="temp-label">Quantum Computer</div>
+            <div class="temp-bar-wrap"><div class="temp-bar-fill" style="background:var(--quantum-cyan)" data-scale="0.03"></div></div>
+            <div class="temp-val">−273.13°C</div>
+          </div>
+          <div class="temp-row">
+            <div class="temp-label">Absolute Zero</div>
+            <div class="temp-bar-wrap"><div class="temp-bar-fill" style="background:rgba(0,245,255,0.2)" data-scale="0.01"></div></div>
+            <div class="temp-val">−273.15°C</div>
+          </div>
+        </div>
+        <div class="temp-callout">
+          ⚠ A quantum chip must be 150× colder than outer space.<br>
+          Operating temperature: 15 millikelvin above absolute zero.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pull Quote -->
+  <div class="pull-quote reveal">
+    <blockquote>
+      "We have a chance here to do something that will change the world forever. Quantum computing is not just a faster computer. It's a different kind of thinking."
+      <cite>— Michio Kaku, Theoretical Physicist</cite>
+    </blockquote>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 8: FUTURE — CHAPTER 06
+     ================================================ -->
+<section id="future" data-chapter="6">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">06 / WHAT COMES NEXT</div>
+      <h2 class="section-title">THE QUANTUM <span class="cyan">FUTURE</span></h2>
+      <p class="section-subtitle">"The quantum future is closer than you think."</p>
+    </div>
+
+    <!-- Roadmap -->
+    <div class="roadmap" style="margin-top:3rem">
+      <div class="roadmap-card reveal"><div class="roadmap-year">2025</div><div class="roadmap-title">1,000+ Qubits</div><div class="roadmap-body">IBM and Google cross the 1,000-qubit threshold with improved error rates.</div></div>
+      <div class="roadmap-card reveal"><div class="roadmap-year">2027</div><div class="roadmap-title">Error Correction</div><div class="roadmap-body">First demonstrations of fully error-corrected logical qubits at scale.</div></div>
+      <div class="roadmap-card reveal"><div class="roadmap-year">2030</div><div class="roadmap-title">Fault-Tolerant</div><div class="roadmap-body">Fault-tolerant quantum computers solving real commercial problems emerge.</div></div>
+      <div class="roadmap-card reveal"><div class="roadmap-year">2033</div><div class="roadmap-title">IBM 100K Qubits</div><div class="roadmap-body">IBM's publicly stated goal: 100,000-qubit system with full error correction.</div></div>
+      <div class="roadmap-card reveal"><div class="roadmap-year">2040</div><div class="roadmap-title">Quantum Internet</div><div class="roadmap-body">A global quantum communication network using entanglement for unhackable data transfer.</div></div>
+    </div>
+
+    <!-- Q-Day Warning -->
+    <div class="qday-panel reveal">
+      <div class="qday-heading">⚠ Q-DAY IS COMING</div>
+      <div class="qday-body">The day a quantum computer can break today's encryption. <strong>NIST estimates Q-Day could arrive between 2030–2035.</strong> Every organization storing sensitive long-term data must begin the transition to post-quantum cryptography <strong>now</strong> — because adversaries are already harvesting encrypted data today to decrypt once quantum arrives ("harvest now, decrypt later"). The US government has mandated a transition to post-quantum standards by 2035.</div>
+    </div>
+
+    <!-- Scenario Tabs -->
+    <div class="scenario-tabs reveal" style="margin-top:3rem">
+      <div class="eyebrow" style="margin-bottom:1.5rem">Future Scenarios</div>
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab('optimistic')">OPTIMISTIC</button>
+        <button class="tab-btn" onclick="switchTab('realistic')">REALISTIC</button>
+        <button class="tab-btn" onclick="switchTab('pessimistic')">PESSIMISTIC</button>
+      </div>
+      <div class="tab-content active" id="tab-optimistic">
+        <p><strong>Full quantum advantage by 2035.</strong> Error correction breakthroughs accelerate on multiple fronts. Within a decade, quantum computers are solving drug discovery, climate modeling, and materials science problems that were previously intractable. A new Moore's Law emerges — quantum scaling — and the pace of discovery in biology, chemistry, and physics accelerates beyond all historical precedent.</p>
+      </div>
+      <div class="tab-content" id="tab-realistic">
+        <p><strong>Hybrid quantum-classical systems dominate 2030–2045.</strong> Quantum computers handle specific, well-defined optimization problems while classical systems handle everything else. The revolution is real but incremental — certain industries (pharma, finance, cryptography) are transformed while general-purpose quantum computing remains limited to specialized labs. Most people never interact with a quantum system directly.</p>
+      </div>
+      <div class="tab-content" id="tab-pessimistic">
+        <p><strong>The decoherence problem proves harder than expected.</strong> Error rates plateau above the threshold required for large-scale fault-tolerant computation. Progress continues in narrow applications but the transformative quantum era is pushed to 2050+. Classical computing improvements and neuromorphic architectures fill the gap. Quantum remains a promising but perpetually "10 years away" technology for another generation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 9: QUANTUM RACE — CHAPTER 07
+     ================================================ -->
+<section id="quantum-race" data-chapter="7">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">07 / GEOPOLITICAL REALITY</div>
+      <h2 class="section-title">THE QUANTUM <span class="cyan">ARMS RACE</span></h2>
+      <p class="section-subtitle">"Nations and corporations are spending billions to get there first."</p>
+    </div>
+
+    <!-- World Map -->
+    <div class="world-map-container reveal">
+      <svg class="world-map-svg" viewBox="0 0 900 450" xmlns="http://www.w3.org/2000/svg">
+        <!-- Simplified world map outline -->
+        <rect width="900" height="450" fill="none"/>
+        <!-- Very simplified continent shapes as background -->
+        <g opacity="0.12" fill="rgba(0,245,255,0.3)" stroke="rgba(0,245,255,0.2)" stroke-width="0.5">
+          <!-- North America -->
+          <path d="M95,60 L180,55 L195,80 L210,95 L200,130 L185,150 L175,185 L155,195 L140,210 L120,200 L100,175 L85,150 L75,120 L80,90 Z"/>
+          <!-- South America -->
+          <path d="M160,215 L195,210 L215,230 L220,260 L215,300 L200,340 L180,360 L165,345 L150,310 L145,270 L148,240 Z"/>
+          <!-- Europe -->
+          <path d="M380,60 L440,55 L455,70 L445,90 L425,100 L405,95 L385,80 Z"/>
+          <!-- Africa -->
+          <path d="M385,105 L440,100 L460,130 L460,180 L445,230 L420,260 L400,255 L375,220 L370,170 L375,130 Z"/>
+          <!-- Asia -->
+          <path d="M450,40 L620,35 L680,60 L700,90 L690,130 L650,150 L580,155 L520,145 L475,130 L450,100 L445,70 Z"/>
+          <!-- Australia -->
+          <path d="M640,250 L720,245 L750,265 L755,295 L735,320 L700,325 L665,310 L645,285 Z"/>
+        </g>
+        <!-- Grid lines -->
+        <g stroke="rgba(0,245,255,0.05)" stroke-width="0.5">
+          <line x1="0" y1="225" x2="900" y2="225"/>
+          <line x1="450" y1="0" x2="450" y2="450"/>
+          <line x1="0" y1="112" x2="900" y2="112"/>
+          <line x1="0" y1="337" x2="900" y2="337"/>
+          <line x1="225" y1="0" x2="225" y2="450"/>
+          <line x1="675" y1="0" x2="675" y2="450"/>
+        </g>
+        <!-- Research dots with pulse rings -->
+        <!-- USA (IBM/Google) -->
+        <g class="map-dot" data-info="USA — IBM, Google, IonQ | 400+ qubits">
+          <circle class="radar-ring" cx="155" cy="120" r="0" fill="none" stroke="var(--quantum-cyan)" stroke-width="1" style="animation-delay:0s"/>
+          <circle cx="155" cy="120" r="7" fill="var(--quantum-cyan)" opacity="0.8"/>
+          <circle cx="155" cy="120" r="3" fill="white"/>
+        </g>
+        <!-- China -->
+        <g class="map-dot" data-info="China — USTC, Baidu, Alibaba | 66+ qubits">
+          <circle class="radar-ring" cx="615" cy="115" r="0" fill="none" stroke="var(--quantum-magenta)" stroke-width="1" style="animation-delay:0.5s"/>
+          <circle cx="615" cy="115" r="7" fill="var(--quantum-magenta)" opacity="0.8"/>
+          <circle cx="615" cy="115" r="3" fill="white"/>
+        </g>
+        <!-- Germany -->
+        <g class="map-dot" data-info="Germany — Forschungszentrum Jülich | IBM Q System One">
+          <circle class="radar-ring" cx="425" cy="82" r="0" fill="none" stroke="var(--quantum-violet)" stroke-width="1" style="animation-delay:1s"/>
+          <circle cx="425" cy="82" r="5" fill="var(--quantum-violet)" opacity="0.8"/>
+          <circle cx="425" cy="82" r="2.5" fill="white"/>
+        </g>
+        <!-- UK -->
+        <g class="map-dot" data-info="United Kingdom — Oxford, Cambridge | leading QC research">
+          <circle class="radar-ring" cx="400" cy="78" r="0" fill="none" stroke="var(--quantum-cyan)" stroke-width="1" style="animation-delay:1.5s"/>
+          <circle cx="400" cy="78" r="5" fill="var(--quantum-cyan)" opacity="0.7"/>
+          <circle cx="400" cy="78" r="2.5" fill="white"/>
+        </g>
+        <!-- Japan -->
+        <g class="map-dot" data-info="Japan — RIKEN, Fujitsu | 64 qubits">
+          <circle class="radar-ring" cx="680" cy="115" r="0" fill="none" stroke="var(--quantum-green)" stroke-width="1" style="animation-delay:2s"/>
+          <circle cx="680" cy="115" r="5" fill="var(--quantum-green)" opacity="0.8"/>
+          <circle cx="680" cy="115" r="2.5" fill="white"/>
+        </g>
+        <!-- Canada -->
+        <g class="map-dot" data-info="Canada — D-Wave Systems | 5000+ qubits (annealing)">
+          <circle class="radar-ring" cx="130" cy="90" r="0" fill="none" stroke="var(--quantum-yellow)" stroke-width="1" style="animation-delay:2.5s"/>
+          <circle cx="130" cy="90" r="5" fill="var(--quantum-yellow)" opacity="0.8"/>
+          <circle cx="130" cy="90" r="2.5" fill="white"/>
+        </g>
+      </svg>
+      <div class="map-tooltip" id="mapTooltip"></div>
+    </div>
+
+    <!-- Investment bars -->
+    <div class="investment-bars reveal" style="margin-top:3rem">
+      <div class="eyebrow" style="margin-bottom:1.5rem">National Quantum Investment</div>
+      <div class="inv-row"><div class="inv-country">🇺🇸 USA</div><div class="inv-bar-wrap"><div class="inv-bar" data-scale="0.25"></div></div><div class="inv-amount">$3.7B+</div></div>
+      <div class="inv-row"><div class="inv-country">🇨🇳 China</div><div class="inv-bar-wrap"><div class="inv-bar" data-scale="1.0" style="background:linear-gradient(90deg,var(--quantum-magenta),var(--quantum-violet))"></div></div><div class="inv-amount">$15B+</div></div>
+      <div class="inv-row"><div class="inv-country">🇪🇺 EU</div><div class="inv-bar-wrap"><div class="inv-bar" data-scale="0.08"></div></div><div class="inv-amount">$1.2B</div></div>
+      <div class="inv-row"><div class="inv-country">🇯🇵 Japan</div><div class="inv-bar-wrap"><div class="inv-bar" data-scale="0.045"></div></div><div class="inv-amount">$670M</div></div>
+      <div class="inv-row"><div class="inv-country">🇮🇳 India</div><div class="inv-bar-wrap"><div class="inv-bar" data-scale="0.049"></div></div><div class="inv-amount">$730M</div></div>
+    </div>
+
+    <div class="reveal" style="margin-top:3rem;max-width:700px">
+      <p style="font-size:var(--font-body);color:var(--text-secondary);line-height:1.85">China's investment of over $15 billion dwarfs all other nations — a strategic bet that quantum supremacy translates directly to economic and military dominance. The US has responded with the <strong style="color:var(--text-primary)">CHIPS and Science Act</strong>, allocating billions to domestic quantum research. Intelligence agencies now classify quantum computing breakthroughs at the same strategic level as nuclear weapons development in the 1940s. This is not a technology race — it is a quantum arms race.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 10: INTERACTIVE DEMO — CHAPTER 08
+     ================================================ -->
+<section id="interactive-demo" data-chapter="8">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">08 / HANDS-ON</div>
+      <h2 class="section-title">EXPERIENCE <span class="cyan">QUANTUM</span> YOURSELF</h2>
+      <p class="section-subtitle">"A simplified simulation — no physics degree required."</p>
+    </div>
+
+    <div class="demo-tabs reveal" style="margin-top:3rem">
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchDemoTab('superposition')">SUPERPOSITION</button>
+        <button class="tab-btn" onclick="switchDemoTab('speed')">SPEED TEST</button>
+        <button class="tab-btn" onclick="switchDemoTab('encryption')">ENCRYPTION</button>
+      </div>
+
+      <!-- Superposition Demo -->
+      <div class="demo-content tab-content active" id="tab-superposition">
+        <div class="bloch-demo">
+          <div class="bloch-visual">
+            <div class="bloch-sphere-3d" id="blochSphere">
+              <div class="bloch-equator"></div>
+              <div class="bloch-meridian"></div>
+              <div class="bloch-state-dot north" id="stateDot"></div>
+            </div>
+          </div>
+          <div class="prob-bar-container">
+            <div class="prob-label"><span>|0⟩ probability</span><span id="prob0">100%</span></div>
+            <div class="prob-track"><div class="prob-fill" id="probFill" style="width:100%"></div></div>
+            <div class="prob-label" style="margin-top:0.5rem"><span>|1⟩ probability</span><span id="prob1">0%</span></div>
+          </div>
+          <div class="demo-btns">
+            <button class="demo-btn" onclick="setQubitState(0)">SET TO |0⟩</button>
+            <button class="demo-btn" onclick="setQubitState(1)">SET TO |1⟩</button>
+            <button class="demo-btn" onclick="applyHadamard()">HADAMARD GATE</button>
+            <button class="demo-btn" onclick="measureQubit()" style="border-color:var(--quantum-yellow);color:var(--quantum-yellow)">MEASURE</button>
+          </div>
+          <div class="demo-result" id="measureResult"></div>
+        </div>
+      </div>
+
+      <!-- Speed Race Demo -->
+      <div class="demo-content tab-content" id="tab-speed">
+        <div class="race-demo">
+          <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:1.5rem;line-height:1.7">Watch classical vs quantum computation in action. Classical explores one path at a time. Quantum explores all paths simultaneously — then collapses to the answer.</p>
+          <div style="margin-bottom:0.5rem">
+            <div class="race-label">CLASSICAL COMPUTER — Sequential search</div>
+            <div style="position:relative;height:36px;background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);overflow:hidden;margin-bottom:1rem">
+              <div id="classicalRacer" style="position:absolute;left:0;top:0;height:100%;width:0%;background:rgba(100,100,130,0.4);display:flex;align-items:center;padding-left:0.5rem;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--text-muted);transition:none;white-space:nowrap"></div>
+            </div>
+            <div class="race-label">QUANTUM COMPUTER — Parallel superposition</div>
+            <div style="position:relative;height:36px;background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);overflow:hidden">
+              <div id="quantumRacer" style="position:absolute;left:0;top:0;height:100%;width:0%;background:rgba(0,245,255,0.15);display:flex;align-items:center;padding-left:0.5rem;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--quantum-cyan);transition:none;white-space:nowrap;box-shadow:inset 0 0 15px rgba(0,245,255,0.1)"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
+            <button class="demo-btn" onclick="startRace()" style="border-color:var(--quantum-green);color:var(--quantum-green)">▶ START RACE</button>
+            <button class="demo-btn" onclick="resetRace()">↺ RESET</button>
+          </div>
+          <div id="raceResult" style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;color:var(--quantum-cyan);margin-top:1rem;min-height:1.5rem"></div>
+        </div>
+      </div>
+
+      <!-- Encryption Demo -->
+      <div class="demo-content tab-content" id="tab-encryption">
+        <div class="enc-calc">
+          <div class="enc-slider-wrap">
+            <div class="enc-slider-label"><span>Key length: <span id="sliderVal">2048</span> bits</span><span style="color:var(--quantum-cyan)">Drag to change →</span></div>
+            <input type="range" class="enc-slider" id="encSlider" min="256" max="4096" step="256" value="2048" oninput="updateEncCalc()">
+          </div>
+          <div class="enc-results">
+            <div class="enc-result-card classical">
+              <div class="enc-type c">Classical Computer</div>
+              <div class="enc-time" id="classicalTime">300 trillion years</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;font-family:'JetBrains Mono',monospace">Time to crack</div>
+            </div>
+            <div class="enc-result-card quantum">
+              <div class="enc-type q">Quantum Computer</div>
+              <div class="enc-time" id="quantumTime">~8 hours</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;font-family:'JetBrains Mono',monospace">Time to crack</div>
+            </div>
+          </div>
+          <p style="font-size:0.75rem;color:var(--text-muted);line-height:1.6;font-family:'JetBrains Mono',monospace">* Simplified model using Shor's algorithm complexity estimates. Actual quantum times assume a fault-tolerant quantum computer with sufficient qubits.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 11: GLOSSARY
+     ================================================ -->
+<section id="glossary">
+  <div class="container section-pad">
+    <div class="chapter-opener reveal">
+      <div class="chapter-opener-num">REFERENCE</div>
+      <h2 class="section-title">QUANTUM <span class="cyan">DICTIONARY</span></h2>
+      <p class="section-subtitle">"Every term you need to understand the revolution."</p>
+    </div>
+
+    <div class="glossary-grid" style="margin-top:3rem">
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Qubit</div>
+        <div class="gloss-short">The basic unit of quantum information</div>
+        <div class="gloss-expanded"><div class="gloss-full">A qubit (quantum bit) is the quantum analog of a classical bit. Unlike a classical bit which is always 0 or 1, a qubit can exist in a superposition of both states simultaneously until measured. Think of it as a spinning coin — it's both heads and tails until it lands.<div class="gloss-fact">⚡ 300 qubits can represent more states than atoms in the observable universe</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Superposition</div>
+        <div class="gloss-short">Existing in multiple states simultaneously</div>
+        <div class="gloss-expanded"><div class="gloss-full">The quantum property that allows a qubit to exist in a combination of |0⟩ and |1⟩ states simultaneously. This lets quantum computers explore many solutions at once. Measurement collapses the superposition to a definite state.<div class="gloss-fact">⚡ Doubles computational power for each additional qubit in superposition</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Entanglement</div>
+        <div class="gloss-short">Quantum correlation between particles</div>
+        <div class="gloss-expanded"><div class="gloss-full">When two qubits are entangled, measuring one instantly determines the state of the other — regardless of the distance between them. Einstein called this "spooky action at a distance." It's the foundation of quantum communication and quantum cryptography.<div class="gloss-fact">⚡ Used in quantum key distribution for theoretically unbreakable encryption</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Decoherence</div>
+        <div class="gloss-short">Loss of quantum properties from interference</div>
+        <div class="gloss-expanded"><div class="gloss-full">The process by which quantum systems lose their quantum properties due to interaction with their environment. Heat, electromagnetic radiation, and even nearby particles can cause a qubit to decohere — essentially "forgetting" that it was in superposition.<div class="gloss-fact">⚡ Current qubits decohere in microseconds — the main challenge in quantum computing</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Quantum Gate</div>
+        <div class="gloss-short">Operations on qubits, like logic gates</div>
+        <div class="gloss-expanded"><div class="gloss-full">Quantum gates are the building blocks of quantum circuits — they manipulate qubit states to perform computations. Unlike classical logic gates, quantum gates are reversible. Common gates include the Hadamard gate (creates superposition) and CNOT gate (creates entanglement).<div class="gloss-fact">⚡ All quantum gates are unitary matrices — reversible transformations of quantum states</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Shor's Algorithm</div>
+        <div class="gloss-short">Quantum algorithm that breaks encryption</div>
+        <div class="gloss-expanded"><div class="gloss-full">Developed by Peter Shor in 1994, this quantum algorithm can factor large numbers exponentially faster than any known classical algorithm. Since RSA encryption relies on the difficulty of factoring large numbers, Shor's algorithm could break most of today's internet security.<div class="gloss-fact">⚡ Would break RSA-2048 in hours; classically it would take longer than the age of the universe</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Quantum Supremacy</div>
+        <div class="gloss-short">When quantum outperforms any classical computer</div>
+        <div class="gloss-expanded"><div class="gloss-full">The milestone where a quantum computer performs a task that no classical computer could complete in any feasible timeframe. Google claimed this in 2019 with its Sycamore processor completing a calculation in 200 seconds that would take the best classical supercomputer 10,000 years.<div class="gloss-fact">⚡ IBM disputed Google's claim, arguing their Summit supercomputer could do it in 2.5 days</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Grover's Algorithm</div>
+        <div class="gloss-short">Quantum search algorithm</div>
+        <div class="gloss-expanded"><div class="gloss-full">A quantum algorithm for searching unsorted databases with quadratic speedup over classical methods. If a classical computer searches N items in O(N) time, Grover's algorithm does it in O(√N) time. Searching a database of 1 trillion items? Classical: 1 trillion steps. Quantum: ~1 million steps.<div class="gloss-fact">⚡ Could crack symmetric encryption keys in half the bit-length time</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Bloch Sphere</div>
+        <div class="gloss-short">Mathematical model of a qubit's state</div>
+        <div class="gloss-expanded"><div class="gloss-full">A geometric representation of the quantum state of a single qubit. The north pole represents |0⟩, the south pole |1⟩, and any point on the sphere represents a valid superposition. Quantum gates are rotations of the sphere.<div class="gloss-fact">⚡ All single-qubit operations can be visualized as rotations of this sphere</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Post-Quantum Cryptography</div>
+        <div class="gloss-short">Encryption resistant to quantum attacks</div>
+        <div class="gloss-expanded"><div class="gloss-full">New cryptographic algorithms designed to be secure against both classical and quantum computers. NIST standardized four post-quantum algorithms in 2024 including CRYSTALS-Kyber and CRYSTALS-Dilithium. Governments worldwide are mandating transition to these systems.<div class="gloss-fact">⚡ US government mandated transition by 2035 — migration has already begun</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Quantum Error Correction</div>
+        <div class="gloss-short">Protecting qubits from computational errors</div>
+        <div class="gloss-expanded"><div class="gloss-full">Methods for detecting and correcting errors in quantum computations without measuring the qubits directly (which would collapse them). The challenge: each logical qubit may require 1,000+ physical qubits for redundancy. Google's Willow chip demonstrated below-threshold error correction in 2024.<div class="gloss-fact">⚡ A fault-tolerant quantum computer may need millions of physical qubits</div></div></div>
+      </div>
+      <div class="gloss-card" onclick="toggleGloss(this)">
+        <div class="gloss-term">Topological Qubit</div>
+        <div class="gloss-short">Inherently protected qubits using exotic physics</div>
+        <div class="gloss-expanded"><div class="gloss-full">A theoretical qubit design based on Majorana fermions that stores quantum information in the topology of a material rather than in a single particle. This makes them inherently resistant to local noise and decoherence. Microsoft has been pursuing this approach for over a decade.<div class="gloss-fact">⚡ Microsoft claimed first topological qubit demonstration in 2023</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================
+     SECTION 12: CTA — CONCLUSION
+     ================================================ -->
+<section id="cta-section">
+  <canvas id="cta-canvas"></canvas>
+  <div class="glow-bg cta-glow-tl"></div>
+  <div class="glow-bg cta-glow-tr"></div>
+  <div class="glow-bg cta-glow-bl"></div>
+  <div class="glow-bg cta-glow-br"></div>
+  <div class="cta-content reveal">
+    <div class="cta-eyebrow">The Future Is Quantum</div>
+    <h2 class="cta-title">Are You Ready for What Comes Next?</h2>
+    <p class="cta-body">Quantum computing is no longer science fiction. Within your lifetime, it will reshape security, medicine, climate science, and artificial intelligence. The question isn't <em>if</em> — it's whether you'll be among those who understand it when it arrives.</p>
+    <div class="cta-btns">
+      <button class="btn-primary" onclick="document.getElementById('problem').scrollIntoView({behavior:'smooth'})">EXPLORE AGAIN →</button>
+      <button class="btn-secondary" onclick="document.getElementById('glossary').scrollIntoView({behavior:'smooth'})">VIEW GLOSSARY</button>
+    </div>
+    <div class="cta-divider"></div>
+    
+  </div>
+</section>
+
+<!-- ================================================
+     FOOTER
+     ================================================ -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo"><div class="q-mark">Q</div> QUANTUM LEAP</div>
+      <div class="footer-tagline">An Interactive Documentary Experience exploring how quantum computing is rewriting the future of reality.</div>
+      <div class="footer-built">Built for INIT 6.0 — National Web Design Competition</div>
+    </div>
+    <div>
+      <div class="footer-nav-title">Chapters</div>
+      <div class="footer-nav-links">
+        <a href="#problem">00 — The Wall</a>
+        <a href="#quantum-science">01 — Qubits &amp; Superposition</a>
+        <a href="#how-it-works">02 — How It Works</a>
+        <a href="#data-section">03 — By The Numbers</a>
+        <a href="#applications">04 — Applications</a>
+        <a href="#challenges">05 — The Obstacles</a>
+        <a href="#future">06 — What Comes Next</a>
+        <a href="#quantum-race">07 — The Arms Race</a>
+        <a href="#interactive-demo">08 — Experience Quantum</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-sources-title">Data Sources</div>
+      <div class="footer-source">IBM Research — Quantum roadmaps and processor specifications</div>
+      <div class="footer-source">Google AI Quantum — Supremacy and Willow papers (Nature)</div>
+      <div class="footer-source">NIST — Post-quantum cryptography standards (2024)</div>
+      <div class="footer-source">MIT Technology Review — Quantum investment analysis</div>
+      <div class="footer-source">McKinsey &amp; Co — Quantum market projections 2040</div>
+      <div class="footer-source" style="margin-top:0.75rem;font-size:0.7rem;opacity:0.6">All data sourced from verified academic and industry publications.</div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2025 QUANTUM LEAP — INIT 6.0 | Interactive Documentary | All Rights Reserved</div>
+</footer>
+
+<script>
+// ============================================
+// PRELOADER
+// ============================================
+const preloader = document.getElementById('preloader');
+const counter = document.getElementById('preloaderCounter');
+let count = 0;
+const countInterval = setInterval(() => {
+  count = Math.min(100, count + Math.floor(Math.random() * 8) + 2);
+  counter.textContent = String(count).padStart(3, '0');
+  if (count >= 100) { clearInterval(countInterval); }
+}, 40);
+
+setTimeout(() => {
+  preloader.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  preloader.style.opacity = '0';
+  preloader.style.transform = 'scale(0.98)';
+  setTimeout(() => { preloader.style.display = 'none'; }, 500);
+}, 2000);
+
+// ============================================
+// CURSOR
+// ============================================
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let ringX = 0, ringY = 0, dotX = 0, dotY = 0;
+
+document.addEventListener('mousemove', e => {
+  dotX = e.clientX; dotY = e.clientY;
+  dot.style.left = dotX + 'px'; dot.style.top = dotY + 'px';
+});
+function animateRing() {
+  ringX += (dotX - ringX) * 0.12;
+  ringY += (dotY - ringY) * 0.12;
+  ring.style.left = ringX + 'px'; ring.style.top = ringY + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+document.querySelectorAll('a, button, .gloss-card, .app-card, .bento-card').forEach(el => {
+  el.addEventListener('mouseenter', () => { ring.classList.add('hovering'); dot.style.opacity = '0'; });
+  el.addEventListener('mouseleave', () => { ring.classList.remove('hovering'); dot.style.opacity = '1'; });
+});
+
+// ============================================
+// SCROLL PROGRESS
+// ============================================
+const scrollBar = document.getElementById('scrollProgress');
+const chapterInd = document.getElementById('chapterIndicator');
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = (scrolled / maxScroll) * 100;
+  scrollBar.style.width = progress + '%';
+
+  // Nav visibility
+  const nav = document.getElementById('mainNav');
+  if (scrolled > window.innerHeight * 0.8) {
+    nav.classList.add('visible');
+    chapterInd.style.opacity = '1';
+  } else {
+    nav.classList.remove('visible');
+    chapterInd.style.opacity = '0';
+  }
+
+  // Active chapter
+  const sections = document.querySelectorAll('section[data-chapter]');
+  let currentChapter = 0;
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top <= window.innerHeight * 0.5) {
+      currentChapter = parseInt(sec.dataset.chapter);
+    }
+  });
+  chapterInd.textContent = `CH ${String(currentChapter).padStart(2,'0')} / 08`;
+
+  // Highlight nav links
+  document.querySelectorAll('.nav-links a[data-chapter]').forEach(a => {
+    a.classList.toggle('active', parseInt(a.dataset.chapter) === currentChapter);
+  });
+});
+
+// ============================================
+// HAMBURGER MENU
+// ============================================
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobileMenu');
+let menuOpen = false;
+hamburger.addEventListener('click', () => {
+  menuOpen = !menuOpen;
+  mobileMenu.classList.toggle('open', menuOpen);
+  const spans = hamburger.querySelectorAll('span');
+  if (menuOpen) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+  } else {
+    spans[0].style.transform = '';
+    spans[1].style.opacity = '';
+    spans[2].style.transform = '';
+  }
+});
+function closeMobileMenu() {
+  menuOpen = false;
+  mobileMenu.classList.remove('open');
+  const spans = hamburger.querySelectorAll('span');
+  spans[0].style.transform = ''; spans[1].style.opacity = ''; spans[2].style.transform = '';
+}
+
+// ============================================
+// PARTICLE SYSTEM
+// ============================================
+function initParticles(canvasId, count, mouseRepel) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let mouse = { x: -1000, y: -1000 };
+
+  function resize() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  if (mouseRepel) {
+    canvas.closest('section').addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+    canvas.closest('section').addEventListener('mouseleave', () => { mouse.x = -1000; mouse.y = -1000; });
+  }
+
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size: Math.random() * 2 + 0.5,
+      opacity: Math.random() * 0.4 + 0.2,
+      color: Math.random() > 0.5 ? '0,245,255' : '139,92,246'
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach((p, i) => {
+      // Mouse repulsion
+      if (mouseRepel) {
+        const dx = p.x - mouse.x, dy = p.y - mouse.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 100) {
+          const force = (100 - dist) / 100;
+          p.vx += (dx / dist) * force * 0.5;
+          p.vy += (dy / dist) * force * 0.5;
+        }
+      }
+      // Velocity damping
+      p.vx *= 0.99; p.vy *= 0.99;
+      p.x += p.vx; p.y += p.vy;
+      // Wrap
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+      // Draw particle
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.color},${p.opacity})`;
+      ctx.fill();
+      // Draw connections
+      for (let j = i + 1; j < particles.length; j++) {
+        const p2 = particles[j];
+        const dx = p.x - p2.x, dy = p.y - p2.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = `rgba(0,245,255,${0.08 * (1 - dist/120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// Init particles after preloader
+setTimeout(() => {
+  const isMobile = window.innerWidth < 768;
+  initParticles('particle-canvas', isMobile ? 40 : 120, true);
+  initParticles('cta-canvas', isMobile ? 20 : 60, false);
+}, 2100);
+
+// ============================================
+// HERO ANIMATIONS (after preloader)
+// ============================================
+setTimeout(() => {
+  const heroEyebrow = document.getElementById('heroEyebrow');
+  const heroSubtitle = document.getElementById('heroSubtitle');
+  const heroCta = document.getElementById('heroCta');
+  const heroScroll = document.getElementById('heroScroll');
+  const words = document.querySelectorAll('.hero-title .word span');
+
+  heroEyebrow.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  heroEyebrow.style.opacity = '0.8';
+  heroEyebrow.style.transform = 'translateY(0)';
+
+  words.forEach((w, i) => {
+    setTimeout(() => {
+      w.style.transition = 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.23,1,0.32,1)';
+      w.style.opacity = '1';
+      w.style.transform = 'translateY(0)';
+    }, 300 + i * 200);
+  });
+
+  setTimeout(() => {
+    heroSubtitle.style.transition = 'opacity 0.6s ease';
+    heroSubtitle.style.opacity = '0.85';
+    heroCta.style.transition = 'opacity 0.6s ease';
+    heroCta.style.opacity = '1';
+    heroScroll.style.transition = 'opacity 0.6s ease';
+    heroScroll.style.opacity = '0.6';
+  }, 1200);
+}, 2200);
+
+// ============================================
+// INTERSECTION OBSERVER (Reveal + Counters + Bars)
+// ============================================
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      el.style.transition = 'opacity 0.9s cubic-bezier(0.23,1,0.32,1), transform 0.9s cubic-bezier(0.23,1,0.32,1)';
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+      revealObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// Stat counters
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const target = parseInt(el.dataset.target);
+      const suffix = el.dataset.suffix || '';
+      if (!target) return;
+      let current = 0;
+      const duration = 2500;
+      const startTime = performance.now();
+      function updateCounter(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        current = Math.floor(eased * target);
+        el.textContent = current.toLocaleString() + suffix;
+        if (progress < 1) requestAnimationFrame(updateCounter);
+      }
+      requestAnimationFrame(updateCounter);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.stat-num[data-target]').forEach(el => counterObserver.observe(el));
+
+// Power bars
+const barObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.bar').forEach(bar => {
+        const targetW = bar.dataset.width;
+        setTimeout(() => { bar.style.transition = 'width 1.5s cubic-bezier(0.4,0,0.2,1)'; bar.style.width = targetW; }, 100);
+      });
+      barObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+const powerBars = document.getElementById('powerBars');
+if (powerBars) barObserver.observe(powerBars);
+
+// Temperature bars
+const tempObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.temp-bar-fill').forEach((bar, i) => {
+        setTimeout(() => {
+          bar.style.transform = `scaleX(${bar.dataset.scale})`;
+        }, i * 100);
+      });
+      tempObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+const tempChart = document.getElementById('tempChart');
+if (tempChart) tempObserver.observe(tempChart);
+
+// Investment bars
+const invObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.inv-bar').forEach((bar, i) => {
+        setTimeout(() => {
+          bar.style.transition = 'transform 1.5s cubic-bezier(0.4,0,0.2,1)';
+          bar.style.transform = `scaleX(${bar.dataset.scale})`;
+        }, i * 150);
+      });
+      invObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+document.querySelectorAll('.investment-bars').forEach(el => invObserver.observe(el));
+
+// ============================================
+// MOORE'S LAW CHART
+// ============================================
+function drawMooresChart() {
+  const svg = document.getElementById('mooresChart');
+  if (!svg) return;
+  const W = 900, H = 280, PL = 70, PR = 30, PT = 20, PB = 50;
+  const cW = W - PL - PR, cH = H - PT - PB;
+
+  const data = [
+    [1971,2300],[1974,6000],[1978,29000],[1982,134000],[1986,275000],
+    [1989,1200000],[1993,3100000],[1997,7500000],[2000,42000000],
+    [2003,410000000],[2006,1700000000],[2009,2300000000],[2012,5000000000],
+    [2015,14000000000],[2018,19200000000],[2020,50000000000],[2022,134000000000],
+    [2024,192000000000]
+  ];
+
+  const minYear = 1970, maxYear = 2026;
+  const minLog = Math.log10(1000), maxLog = Math.log10(300000000000);
+
+  function xPos(year) { return PL + (year - minYear) / (maxYear - minYear) * cW; }
+  function yPos(val) { return PT + cH - (Math.log10(val) - minLog) / (maxLog - minLog) * cH; }
+
+  let innerHTML = '';
+
+  // Grid lines
+  [1980,1990,2000,2010,2020].forEach(y => {
+    const x = xPos(y);
+    innerHTML += `<line x1="${x}" y1="${PT}" x2="${x}" y2="${PT+cH}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>`;
+    innerHTML += `<text x="${x}" y="${H-10}" text-anchor="middle" fill="#4A5680" font-family="JetBrains Mono, monospace" font-size="10">${y}</text>`;
+  });
+
+  // Y axis labels
+  [1e4, 1e6, 1e8, 1e10, 1e12].forEach(v => {
+    const y = yPos(v);
+    if (y > PT && y < PT + cH) {
+      innerHTML += `<line x1="${PL-5}" y1="${y}" x2="${PL+cW}" y2="${y}" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>`;
+      const label = v >= 1e12 ? (v/1e12)+'T' : v >= 1e9 ? (v/1e9)+'B' : v >= 1e6 ? (v/1e6)+'M' : (v/1e3)+'K';
+      innerHTML += `<text x="${PL-8}" y="${y+4}" text-anchor="end" fill="#4A5680" font-family="JetBrains Mono, monospace" font-size="9">${label}</text>`;
+    }
+  });
+
+  // Quantum zone
+  const qX = xPos(2019);
+  innerHTML += `<rect x="${qX}" y="${PT}" width="${xPos(2026)-qX}" height="${cH}" fill="rgba(0,245,255,0.03)"/>`;
+  innerHTML += `<text x="${qX + (xPos(2026)-qX)/2}" y="${PT+20}" text-anchor="middle" fill="rgba(0,245,255,0.4)" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="2">QUANTUM ERA</text>`;
+
+  // Physical limit line
+  const limitY = yPos(data[data.length-1][1]);
+  innerHTML += `<line x1="${xPos(2020)}" y1="${limitY}" x2="${xPos(2026)}" y2="${limitY}" stroke="rgba(255,80,80,0.5)" stroke-width="1.5" stroke-dasharray="6,4"/>`;
+  innerHTML += `<text x="${xPos(2023)}" y="${limitY-8}" text-anchor="middle" fill="rgba(255,80,80,0.7)" font-family="JetBrains Mono, monospace" font-size="9">PHYSICAL LIMIT</text>`;
+
+  // Data line
+  let pathD = '';
+  data.forEach(([year, val], i) => {
+    const x = xPos(year), y = yPos(val);
+    pathD += i === 0 ? `M${x},${y}` : ` L${x},${y}`;
+  });
+  innerHTML += `<path d="${pathD}" stroke="var(--quantum-cyan)" stroke-width="2" fill="none" opacity="0.8"/>`;
+
+  // Data points
+  data.forEach(([year, val]) => {
+    innerHTML += `<circle cx="${xPos(year)}" cy="${yPos(val)}" r="3" fill="var(--quantum-cyan)" opacity="0.7"/>`;
+  });
+
+  // Axes
+  innerHTML += `<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+cH}" stroke="rgba(0,245,255,0.15)" stroke-width="1"/>`;
+  innerHTML += `<line x1="${PL}" y1="${PT+cH}" x2="${PL+cW}" y2="${PT+cH}" stroke="rgba(0,245,255,0.15)" stroke-width="1"/>`;
+
+  svg.innerHTML = innerHTML;
+}
+setTimeout(drawMooresChart, 2100);
+
+// ============================================
+// MAP TOOLTIPS
+// ============================================
+document.querySelectorAll('.map-dot').forEach(dot => {
+  dot.addEventListener('mouseenter', e => {
+    const tooltip = document.getElementById('mapTooltip');
+    if (!tooltip) return;
+    tooltip.textContent = dot.dataset.info;
+    tooltip.style.opacity = '1';
+    const rect = dot.closest('.world-map-container').getBoundingClientRect();
+    tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
+    tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+  });
+  dot.addEventListener('mousemove', e => {
+    const tooltip = document.getElementById('mapTooltip');
+    if (!tooltip) return;
+    const rect = dot.closest('.world-map-container').getBoundingClientRect();
+    tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
+    tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+  });
+  dot.addEventListener('mouseleave', () => {
+    const tooltip = document.getElementById('mapTooltip');
+    if (tooltip) tooltip.style.opacity = '0';
+  });
+});
+
+// ============================================
+// TABS
+// ============================================
+function switchTab(id) {
+  document.querySelectorAll('.scenario-tabs .tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.scenario-tabs .tab-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(id));
+  });
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+function switchDemoTab(id) {
+  document.querySelectorAll('.demo-tabs .tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.demo-tabs .tab-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(id.slice(0,3)));
+  });
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// ============================================
+// GLOSSARY TOGGLE
+// ============================================
+function toggleGloss(card) {
+  const isActive = card.classList.contains('active');
+  document.querySelectorAll('.gloss-card.active').forEach(c => c.classList.remove('active'));
+  if (!isActive) card.classList.add('active');
+}
+
+// ============================================
+// SUPERPOSITION DEMO
+// ============================================
+let qubitState = 0; // 0 = |0>, 1 = |1>, 0.5 = superposition
+function setQubitState(state) {
+  qubitState = state;
+  const dot = document.getElementById('stateDot');
+  const probFill = document.getElementById('probFill');
+  const p0 = document.getElementById('prob0');
+  const p1 = document.getElementById('prob1');
+  const result = document.getElementById('measureResult');
+  result.textContent = '';
+  if (state === 0) {
+    dot.className = 'bloch-state-dot north';
+    probFill.style.width = '100%';
+    p0.textContent = '100%'; p1.textContent = '0%';
+  } else {
+    dot.className = 'bloch-state-dot south';
+    probFill.style.width = '0%';
+    p0.textContent = '0%'; p1.textContent = '100%';
+  }
+}
+function applyHadamard() {
+  qubitState = 0.5;
+  const dot = document.getElementById('stateDot');
+  dot.className = 'bloch-state-dot equator';
+  document.getElementById('probFill').style.width = '50%';
+  document.getElementById('prob0').textContent = '50%';
+  document.getElementById('prob1').textContent = '50%';
+  document.getElementById('measureResult').textContent = '';
+}
+function measureQubit() {
+  const result = document.getElementById('measureResult');
+  if (qubitState === 0.5) {
+    const outcome = Math.random() > 0.5 ? 1 : 0;
+    setQubitState(outcome);
+    result.style.color = outcome === 0 ? 'var(--quantum-cyan)' : 'var(--quantum-yellow)';
+    result.textContent = `COLLAPSED TO |${outcome}⟩ — Quantum randomness in action!`;
+  } else {
+    result.textContent = `State is definite: |${qubitState}⟩ — apply Hadamard first!`;
+    result.style.color = 'var(--text-muted)';
+  }
+}
+
+// ============================================
+// RACE DEMO
+// ============================================
+let raceRunning = false;
+let classicalProgress = 0, quantumProgress = 0;
+let classicalInterval, quantumInterval;
+function startRace() {
+  if (raceRunning) return;
+  raceRunning = true;
+  resetRace();
+  const cRacer = document.getElementById('classicalRacer');
+  const qRacer = document.getElementById('quantumRacer');
+  const result = document.getElementById('raceResult');
+  let cP = 0, qP = 0;
+  let qDone = false, cDone = false;
+
+  // Quantum: fills quickly all at once (parallel search)
+  let qStep = 0;
+  const qSteps = 60;
+  quantumInterval = setInterval(() => {
+    qStep++;
+    qP = (qStep / qSteps) * 100;
+    qRacer.style.width = qP + '%';
+    qRacer.textContent = qP < 30 ? '◈◈◈ SUPERPOSITION...' : qP < 70 ? '◈◈◈ INTERFERENCE...' : '◈ SOLUTION FOUND!';
+    if (qStep >= qSteps) {
+      clearInterval(quantumInterval);
+      qDone = true;
+      if (!cDone) result.textContent = '⚡ Quantum wins! Solution found while classical is still searching...';
+    }
+  }, 33);
+
+  // Classical: fills slowly, step by step
+  let cStep = 0;
+  const cSteps = 300;
+  classicalInterval = setInterval(() => {
+    cStep++;
+    cP = (cStep / cSteps) * 100;
+    cRacer.style.width = cP + '%';
+    cRacer.textContent = `Checking path ${cStep}/${cSteps}...`;
+    if (cStep >= cSteps) {
+      clearInterval(classicalInterval);
+      cDone = true;
+      raceRunning = false;
+      if (qDone) result.textContent = '✓ Race complete! Quantum finished 5× faster. At scale, this gap is trillions of times larger.';
+    }
+  }, 33);
+}
+function resetRace() {
+  clearInterval(classicalInterval);
+  clearInterval(quantumInterval);
+  raceRunning = false;
+  document.getElementById('classicalRacer').style.width = '0%';
+  document.getElementById('classicalRacer').textContent = '';
+  document.getElementById('quantumRacer').style.width = '0%';
+  document.getElementById('quantumRacer').textContent = '';
+  document.getElementById('raceResult').textContent = '';
+}
+
+// ============================================
+// ENCRYPTION CALCULATOR
+// ============================================
+function updateEncCalc() {
+  const bits = parseInt(document.getElementById('encSlider').value);
+  document.getElementById('sliderVal').textContent = bits.toLocaleString();
+
+  // Simplified estimates
+  const classicalTimes = {
+    256: '~300 quadrillion years',
+    512: '~10^43 years',
+    1024: '~10^77 years',
+    1536: '~10^101 years',
+    2048: '~300 trillion years',
+    2560: '~10^128 years',
+    3072: '~10^150 years',
+    3584: '~10^172 years',
+    4096: '~10^194 years'
+  };
+  const quantumTimes = {
+    256: '~2 minutes',
+    512: '~15 minutes',
+    1024: '~2 hours',
+    1536: '~5 hours',
+    2048: '~8 hours',
+    2560: '~18 hours',
+    3072: '~2 days',
+    3584: '~4 days',
+    4096: '~8 days'
+  };
+
+  // Find closest key
+  const keys = [256,512,1024,1536,2048,2560,3072,3584,4096];
+  const closest = keys.reduce((prev, curr) => Math.abs(curr - bits) < Math.abs(prev - bits) ? curr : prev);
+  document.getElementById('classicalTime').textContent = classicalTimes[closest] || '—';
+  document.getElementById('quantumTime').textContent = quantumTimes[closest] || '—';
+}
+
+// ============================================
+// GSAP ANIMATIONS (loaded after page)
+// ============================================
+window.addEventListener('load', () => {
+  if (typeof gsap === 'undefined') return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Reveal all .reveal elements
+  gsap.utils.toArray('.reveal').forEach(el => {
+    gsap.fromTo(el,
+      { y: 60, opacity: 0 },
+      {
+        y: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 82%', once: true }
+      }
+    );
+  });
+
+  // Chapter title stagger
+  gsap.utils.toArray('.chapter-opener h2').forEach(h2 => {
+    const words = h2.textContent.split(' ');
+    // Already rendered, just animate
+    gsap.from(h2, {
+      y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
+      scrollTrigger: { trigger: h2, start: 'top 80%', once: true }
+    });
+  });
+
+  // Bento cards stagger
+  gsap.utils.toArray('.bento-grid, .apps-grid, .stats-grid').forEach(grid => {
+    gsap.from(grid.children, {
+      y: 40, opacity: 0, scale: 0.96, duration: 0.7,
+      stagger: 0.12, ease: 'power3.out',
+      scrollTrigger: { trigger: grid, start: 'top 80%', once: true }
+    });
+  });
+
+  // Timeline spine draw
+  const spine = document.getElementById('timelineSpine');
+  if (spine) {
+    gsap.fromTo(spine,
+      { scaleY: 0 },
+      { scaleY: 1, duration: 2, ease: 'none',
+        scrollTrigger: { trigger: '#quantumTimeline', start: 'top 70%', end: 'bottom 30%', scrub: 1 }
+      }
+    );
+  }
+
+  // Roadmap stagger
+  const roadmap = document.querySelector('.roadmap');
+  if (roadmap) {
+    gsap.from(roadmap.children, {
+      y: 50, opacity: 0, duration: 0.6, stagger: 0.15, ease: 'power3.out',
+      scrollTrigger: { trigger: roadmap, start: 'top 80%', once: true }
+    });
+  }
+
+  // Horizontal scroll section (desktop only)
+  if (window.innerWidth > 768) {
+    const panels = document.getElementById('horizPanels');
+    const progressBar = document.getElementById('horizProgressBar');
+    if (panels) {
+      const totalWidth = panels.scrollWidth - window.innerWidth;
+      ScrollTrigger.create({
+        trigger: '#how-it-works',
+        start: 'top top',
+        end: () => `+=${totalWidth}`,
+        pin: true,
+        anticipatePin: 1,
+        scrub: 1,
+        onUpdate: self => {
+          panels.style.transform = `translateX(-${self.progress * totalWidth}px)`;
+          if (progressBar) progressBar.style.width = (self.progress * 100) + '%';
+        }
+      });
+    }
+  }
+});
+</script>
+</body>
+</html>
